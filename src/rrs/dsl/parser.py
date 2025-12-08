@@ -217,6 +217,9 @@ class RRSParser:
         self.lark = Lark(grammar, parser='lalr', postlex=Indenter())
 
     def parse(self, code: str) -> Program:
+        # Ensure code ends with newline (grammar requires it)
+        if not code.endswith('\n'):
+            code = code + '\n'
         tree = self.lark.parse(code)
         return RRSTransformer().transform(tree)
 

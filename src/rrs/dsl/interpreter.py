@@ -105,6 +105,10 @@ class Interpreter:
         # Random functions
         self.globals.set("random", random.random)
         self.globals.set("randint", random.randint)
+        
+        # Assertion
+        from rrs.core.assertion import rrs_assert
+        self.globals.set("assert", rrs_assert)
 
     def _next_module_id(self):
         self._module_counter += 1

@@ -1,0 +1,10 @@
+# Auto-generated from 1_tflipflop.litematic
+
+module M1Tflipflop():
+    Block("minecraft:piston", pos=(0, 0, 0), facing="up")
+    Block("minecraft:redstone_block", pos=(0, 1, 0))
+    Block("minecraft:observer", pos=(1, 0, 0), facing="west")
+    Block("minecraft:repeater", pos=(2, 0, 0), delay="1", facing="west")
+
+M1Tflipflop()
+
