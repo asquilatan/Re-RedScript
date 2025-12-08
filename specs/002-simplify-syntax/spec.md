@@ -1,115 +1,82 @@
-# Feature Specification: [FEATURE NAME]
+# Feature Specification: Simplify RRS Syntax (RRS-DSL)
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
-**Input**: User description: "$ARGUMENTS"
+## 1. Context and Scope
 
-## User Scenarios & Testing *(mandatory)*
+The current method of defining modules in Re-RedScript (RRS) involves verbose Python class definitions, explicit initialization (`__init__`), and manual management of child components (`self.add`). This boilerplate distracts from the primary goal: designing Minecraft structures logic.
 
-<!--
-  IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
-  Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
-  you should still have a viable MVP (Minimum Viable Product) that delivers value.
-  
-  Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
-  Think of each story as a standalone slice of functionality that can be:
-  - Developed independently
-  - Tested independently
-  - Deployed independently
-  - Demonstrated to users independently
--->
+This feature introduces a dedicated Domain-Specific Language (DSL) or a highly simplified syntax that minimizes boilerplate. The goal is to make the code look as close to the provided `sample_code.py` as possible, potentially introducing a new keyword `module` to replace `def` or `class` wrappers, and handling component registration implicitly.
 
-### User Story 1 - [Brief Title] (Priority: P1)
+### Scope
+- Design and implement a parser/interpreter for a new RRS syntax.
+- Support `module` definitions with parameters.
+- Support implicit component registration (instantiating a block adds it to the current module).
+- Maintain feature parity with the existing Python `Module` system (nesting, properties, export).
+- **Out of Scope**: Graphical editor, IDE plugins (syntax highlighting) for now, though the syntax should be friendly to them.
 
-[Describe this user journey in plain language]
+## 2. User Scenarios
 
-**Why this priority**: [Explain the value and why it has this priority level]
+### Scenario 1: Defining a Simple Module
+**Actor**: RRS Developer
+**Action**: Creates a new file (e.g., `piston_system.rrs`) and defines a module using the new syntax.
+**Input**:
+```python
+module PistonSystem(x, y, z):
+    Piston(pos=(x, y, z), facing="up")
+    Repeater(pos=(x + 1, y, z), delay=4)
+```
+**Outcome**: The system parses this definition and understands it as a module containing one Piston and one Repeater at the specified coordinates.
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+### Scenario 2: Exporting a Structure
+**Actor**: RRS Developer
+**Action**: Runs the RRS compiler on the file.
+**Input**: CLI command `rrs compile piston_system.rrs`
+**Outcome**: A `.litematic` file is generated matching the structure defined in the script.
 
-**Acceptance Scenarios**:
+### Scenario 3: Nested Modules
+**Actor**: RRS Developer
+**Action**: Defines a complex module that uses previously defined modules.
+**Input**:
+```python
+module ComplexMechanism(x, y, z):
+    PistonSystem(x, y, z)
+    PistonSystem(x, y+2, z)
+```
+**Outcome**: The `ComplexMechanism` correctly instantiates two copies of `PistonSystem` at the calculated offsets.
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+### Scenario 4: Edge Cases
+- **Invalid Syntax**: User types `modul PistonSystem` (typo). System should report a clear syntax error at line X.
+- **Undefined Reference**: User tries to use `StickyPiston` but it's not in the library. System should report "Unknown block or module: StickyPiston".
+- **Circular Dependency**: Module A uses Module B, and Module B uses Module A. System should detect recursion limit or circular dependency and error out.
 
----
+## 3. Functional Requirements
 
-### User Story 2 - [Brief Title] (Priority: P2)
+### 3.1 Syntax & Parsing
+- **FR1**: The system MUST support a `module Name(args):` block structure.
+- **FR2**: The syntax MUST allow defining blocks (e.g., `Piston`, `Stone`) without explicit `self.add()` calls. Instantiation implies addition to the active module scope.
+- **FR3**: The syntax MUST support arithmetic expressions for properties (e.g., `pos=(x + 1, y, z)`).
 
-[Describe this user journey in plain language]
+### 3.2 Core Features
+- **FR4**: All standard Minecraft blocks supported in the core library MUST be available in the new syntax.
+- **FR5**: Users MUST be able to define custom modules and use them inside other modules (nesting).
+- **FR6**: The system MUST support exporting the defined modules to `.litematic` format.
 
-**Why this priority**: [Explain the value and why it has this priority level]
+### 3.3 Interoperability (Optional but Recommended)
+- **FR7**: The system SHOULD allow importing/referencing existing `.litematic` files as modules.
 
-**Independent Test**: [Describe how this can be tested independently]
+## 4. Success Criteria
 
-**Acceptance Scenarios**:
+- **SC1 (Verbosity)**: A "Piston + Repeater" module definition must require at least 50% fewer characters than the equivalent `class`-based Python definition.
+- **SC2 (Readability)**: The syntax must match the visual style of the provided `sample_code.py`, specifically removing `self.` prefixes and `class` boilerplate.
+- **SC3 (Correctness)**: The generated `.litematic` file from the new syntax must be identical to one generated by the verbose Python script for the same structure.
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+## 5. Assumptions & Dependencies
 
----
+- **Assumption**: The user is comfortable with a Python-like indentation structure.
+- **Assumption**: We can reuse the existing Python backend logic (the `Module` and `Block` classes) and map the DSL parser to instantiate these objects.
+- **Dependency**: The core RRS Python library (`src/rrs`) must be stable enough to serve as the backend for the DSL.
 
-### User Story 3 - [Brief Title] (Priority: P3)
+## 6. Questions & Clarifications
 
-[Describe this user journey in plain language]
-
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-
----
-
-[Add more user stories as needed, each with an assigned priority]
-
-### Edge Cases
-
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
--->
-
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
-
-## Requirements *(mandatory)*
-
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
-
-### Functional Requirements
-
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
-
-*Example of marking unclear requirements:*
-
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
-
-### Key Entities *(include if feature involves data)*
-
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
-
-## Success Criteria *(mandatory)*
-
-<!--
-  ACTION REQUIRED: Define measurable success criteria.
-  These must be technology-agnostic and measurable.
--->
-
-### Measurable Outcomes
-
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+*Resolved: Language Implementation Strategy*
+- **Decision**: Standalone DSL (Option A).
+- **Reasoning**: To achieve the exact syntax requested (e.g., `module` keyword instead of `def` or `class`), a custom parser is required. This allows full control over the language design without being constrained by Python's syntax rules, while still using the Python backend for execution/export.

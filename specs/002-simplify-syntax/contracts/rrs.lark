@@ -1,0 +1,54 @@
+// Re-RedScript (RRS) Grammar
+// Syntax: Lark EBNF
+
+start: statement+
+
+statement: module_def
+         | instruction
+
+// Module Definition
+// module Name(p1, p2): ...
+module_def: "module" CNAME "(" [params] ")" ":" suite
+
+params: CNAME ("," CNAME)*
+
+suite: NEWLINE INDENT instruction+ DEDENT
+
+// Instructions (Body of module or top-level)
+instruction: function_call NEWLINE
+
+// Function Call (Block or Module instantiation)
+// Piston(pos=(x,y,z), facing="up")
+function_call: CNAME "(" [arguments] ")"
+
+arguments: arg ("," arg)*
+
+arg: expression             -> positional_arg
+   | CNAME "=" expression   -> keyword_arg
+
+// Expressions
+?expression: sum
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+
+?product: atom
+        | product "*" atom  -> mul
+        | product "/" atom  -> div
+
+?atom: NUMBER           -> number
+     | ESCAPED_STRING   -> string
+     | CNAME            -> var
+     | "(" expression ")"
+     | "(" expression ("," expression)+ ")" -> tuple
+
+// Terminals
+%import common.CNAME
+%import common.NUMBER
+%import common.ESCAPED_STRING
+%import common.WS
+%import common.NEWLINE
+%declare INDENT DEDENT
+
+%ignore WS

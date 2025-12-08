@@ -1,0 +1,7 @@
+# rrs.lark update for indentation
+# The previous grammar used NEWLINE INDENT DEDENT but didn't declare them as special terminals for the postlexer properly in all cases?
+# Actually, standard lark python grammar uses _NEWLINE, _INDENT, _DEDENT.
+# Let's check common.lark usage or just define them. 
+# The parser.py uses Indenter which expects _NEWLINE, _INDENT, _DEDENT.
+
+# UPDATING GRAMMAR TO MATCH INDENTER EXPECTATIONS

@@ -1,0 +1,10 @@
+module SampleModule(x, y, z):
+    Piston(pos=(x, y, z), facing="up")
+    Repeater(pos=(x + 1, y, z), facing="east", delay=4)
+
+module ComplexModule(x, y, z):
+    SampleModule(x, y, z)
+    SampleModule(x+2, y, z)
+
+# Instantiate top-level module to export it
+ComplexModule(0, 0, 0)

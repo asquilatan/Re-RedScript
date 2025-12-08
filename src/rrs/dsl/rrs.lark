@@ -1,0 +1,64 @@
+// Re-RedScript (RRS) Grammar
+// Syntax: Lark EBNF
+
+start: (statement | _NEWLINE)+
+
+statement: module_def
+         | instruction
+
+// Module Definition
+module_def: "module" CNAME _LPAR [params] _RPAR _COLON suite
+
+params: CNAME (_COMMA CNAME)*
+
+suite: _NEWLINE _INDENT statement+ _DEDENT
+
+// Instructions
+instruction: function_call _NEWLINE
+
+// Function Call
+function_call: CNAME _LPAR [arguments] _RPAR
+
+arguments: arg (_COMMA arg)*
+
+arg: expression             -> positional_arg
+   | CNAME _EQUALS expression   -> keyword_arg
+
+// Expressions
+?expression: sum
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+
+?product: atom
+        | product "*" atom  -> mul
+        | product "/" atom  -> div
+
+?atom: NUMBER           -> number
+     | ESCAPED_STRING   -> string
+     | CNAME            -> var
+     | _LPAR expression _RPAR
+     | _LPAR expression (_COMMA expression)+ _RPAR -> tuple
+
+// Terminals
+%import common.CNAME
+%import common.NUMBER
+%import common.ESCAPED_STRING
+
+// Named terminals for Indenter
+_LPAR: "("
+_RPAR: ")"
+_COMMA: ","
+_COLON: ":"
+_EQUALS: "="
+
+// Custom WS that does not consume newlines
+WS: /[ 	]+/
+%ignore WS
+
+COMMENT: /#[^\n]*/
+%ignore COMMENT
+
+_NEWLINE: /(\r?\n[\t ]*)+/
+%declare _INDENT _DEDENT
