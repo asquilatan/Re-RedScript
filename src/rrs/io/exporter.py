@@ -37,8 +37,9 @@ def rrs_export(module: Module, filepath: str, region_name: str = "Region"):
         z = b.pos[2] - min_z
         
         try:
-            # Basic block state creation
-            reg[x, y, z] = litemapy.BlockState(b.id)
+            # Convert all property values to strings (Minecraft block states require strings)
+            props = {k: str(v) for k, v in b.properties.items()}
+            reg[x, y, z] = litemapy.BlockState(b.id, **props)
         except Exception as e:
             print(f"Error setting block {b.id} at {x},{y},{z}: {e}")
             
