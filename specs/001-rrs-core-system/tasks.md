@@ -11,9 +11,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project directory structure (src/rrs/core, src/rrs/io, src/rrs/utils, tests/)
-- [ ] T002 Initialize Python project with requirements.txt (including litemapy, pytest)
-- [ ] T003 [P] Configure linting (flake8/ruff) and formatting (black) tools
+- [x] T001 Create project directory structure (src/rrs/core, src/rrs/io, src/rrs/utils, tests/)
+- [x] T002 Initialize Python project with requirements.txt (including litemapy, pytest)
+- [x] T003 [P] Configure linting (flake8/ruff) and formatting (black) tools
 
 ---
 
@@ -23,10 +23,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create base package init file in src/rrs/__init__.py
-- [ ] T005 Implement vector/math utility helpers in src/rrs/utils/math.py
-- [ ] T006 [P] Create empty scaffolding for Module class in src/rrs/core/module.py
-- [ ] T007 [P] Create empty scaffolding for Block class in src/rrs/core/block.py
+- [x] T004 Create base package init file in src/rrs/__init__.py
+- [x] T005 Implement vector/math utility helpers in src/rrs/utils/math.py
+- [x] T006 [P] Create empty scaffolding for Module class in src/rrs/core/module.py
+- [x] T007 [P] Create empty scaffolding for Block class in src/rrs/core/block.py
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -39,14 +39,14 @@
 **Independent Test**: Define a parent module with children and verify absolute positions of children are correct after flattening.
 
 ### Tests for User Story 1
-- [ ] T008 [P] [US1] Unit test for Module attributes and composition in tests/unit/test_module.py
-- [ ] T009 [P] [US1] Unit test for recursive coordinate flattening in tests/unit/test_flattening.py
+- [x] T008 [P] [US1] Unit test for Module attributes and composition in tests/unit/test_module.py
+- [x] T009 [P] [US1] Unit test for recursive coordinate flattening in tests/unit/test_flattening.py
 
 ### Implementation for User Story 1
-- [ ] T010 [US1] Implement Module class `__init__`, `add`, and property storage in src/rrs/core/module.py
-- [ ] T011 [US1] Implement Block class (extending Module) with fixed size in src/rrs/core/block.py
-- [ ] T012 [US1] Implement `flatten()` method in Module to calculate absolute positions in src/rrs/core/module.py
-- [ ] T013 [US1] Define standard Minecraft blocks library (Piston, Repeater, etc.) in src/rrs/core/block.py
+- [x] T010 [US1] Implement Module class `__init__`, `add`, and property storage in src/rrs/core/module.py
+- [x] T011 [US1] Implement Block class (extending Module) with fixed size in src/rrs/core/block.py
+- [x] T012 [US1] Implement `flatten()` method in Module to calculate absolute positions in src/rrs/core/module.py
+- [x] T013 [US1] Define standard Minecraft blocks library (Piston, Repeater, etc.) in src/rrs/core/block.py
 
 **Checkpoint**: Users can create in-memory module trees.
 
@@ -59,13 +59,13 @@
 **Independent Test**: Round-trip test: Export a module -> Import it -> Assert equality.
 
 ### Tests for User Story 2
-- [ ] T014 [P] [US2] Integration test for rrs_export (generate valid file) in tests/integration/test_io.py
-- [ ] T015 [P] [US2] Integration test for rrs_import (read file back) in tests/integration/test_io.py
+- [x] T014 [P] [US2] Integration test for rrs_export (generate valid file) in tests/integration/test_io.py
+- [x] T015 [P] [US2] Integration test for rrs_import (read file back) in tests/integration/test_io.py
 
 ### Implementation for User Story 2
-- [ ] T016 [P] [US2] Implement `rrs_export` using litemapy in src/rrs/io/exporter.py
-- [ ] T017 [P] [US2] Implement `rrs_import` using litemapy in src/rrs/io/importer.py
-- [ ] T018 [US2] Expose export/import functions in top-level src/rrs/__init__.py
+- [x] T016 [P] [US2] Implement `rrs_export` using litemapy in src/rrs/io/exporter.py
+- [x] T017 [P] [US2] Implement `rrs_import` using litemapy in src/rrs/io/importer.py
+- [x] T018 [US2] Expose export/import functions in top-level src/rrs/__init__.py
 
 **Checkpoint**: Users can save/load their creations to disk.
 
@@ -78,12 +78,12 @@
 **Independent Test**: `rrs_assert` returns True for matching modules and False (or raises error) for mismatches.
 
 ### Tests for User Story 3
-- [ ] T019 [P] [US3] Unit test for `rrs_assert` (various property mismatches) in tests/unit/test_assertion.py
+- [x] T019 [P] [US3] Unit test for `rrs_assert` (various property mismatches) in tests/unit/test_assertion.py
 
 ### Implementation for User Story 3
-- [ ] T020 [US3] Implement `rrs_assert` logic for single Module comparison in src/rrs/core/assertion.py
-- [ ] T021 [US3] Extend `rrs_assert` to handle lists of Modules (structures) in src/rrs/core/assertion.py
-- [ ] T022 [US3] Expose `rrs_assert` in top-level src/rrs/__init__.py
+- [x] T020 [US3] Implement `rrs_assert` logic for single Module comparison in src/rrs/core/assertion.py
+- [x] T021 [US3] Extend `rrs_assert` to handle lists of Modules (structures) in src/rrs/core/assertion.py
+- [x] T022 [US3] Expose `rrs_assert` in top-level src/rrs/__init__.py
 
 **Checkpoint**: Debugging tools are available.
 
@@ -93,9 +93,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T023 [P] Add docstrings and type hints to all core classes
-- [ ] T024 Validate quickstart.md example works against implemented code
-- [ ] T025 Cleanup temporary test artifacts (exported .litematic files)
+- [x] T023 [P] Add docstrings and type hints to all core classes
+- [x] T024 Validate quickstart.md example works against implemented code
+- [x] T025 Cleanup temporary test artifacts (exported .litematic files)
 
 ---
 
