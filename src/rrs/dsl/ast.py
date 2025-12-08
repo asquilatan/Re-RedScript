@@ -44,7 +44,11 @@ class Statement(Node):
     pass
 
 @dataclass
-class FunctionCall(Statement):
+class ExprStmt(Statement):
+    expr: Expr
+
+@dataclass
+class FunctionCall(Expr):
     name: str
     args: List[Arg] = field(default_factory=list)
     kwargs: List[Kwarg] = field(default_factory=list)
@@ -58,3 +62,60 @@ class ModuleDef(Statement):
 @dataclass
 class Program(Node):
     statements: List[Statement]
+
+# New Nodes for Advanced Features
+
+@dataclass
+class Assignment(Statement):
+    target: str
+    value: Expr
+
+@dataclass
+class AugAssignment(Statement):
+    target: str
+    op: str
+    value: Expr
+
+@dataclass
+class ListExpr(Expr):
+    elements: List[Expr]
+
+@dataclass
+class ForLoop(Statement):
+    target: str
+    iterable: Expr
+    body: List[Statement]
+
+@dataclass
+class FuncDef(Statement):
+    name: str
+    params: List[str]
+    body: List[Statement]
+
+@dataclass
+class ReturnStmt(Statement):
+    value: Optional[Expr]
+
+@dataclass
+class ImportStmt(Statement):
+    module_name: str
+    alias: Optional[str] = None
+
+@dataclass
+class FromImportStmt(Statement):
+    module_name: str
+    names: List[str]  # List of names to import
+
+@dataclass
+class MethodCall(Expr):
+    obj: Expr
+    method: str
+    args: List[Arg] = field(default_factory=list)
+    kwargs: List[Kwarg] = field(default_factory=list)
+
+@dataclass
+class GetAttr(Expr):
+    obj: Expr
+    attr: str
+
+ASTNode = Node

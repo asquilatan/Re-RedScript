@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 
 from rrs.dsl.parser import RRSParser
-from rrs.dsl.ast import Program, ModuleDef, FunctionCall
+from rrs.dsl.ast import Program, ModuleDef, FunctionCall, ExprStmt
 
 def test_parse_simple_instruction():
     code = """
@@ -17,8 +17,9 @@ Piston(pos=(0,0,0))
     assert isinstance(program, Program)
     assert len(program.statements) == 1
     stmt = program.statements[0]
-    assert isinstance(stmt, FunctionCall)
-    assert stmt.name == "Piston"
+    assert isinstance(stmt, ExprStmt)
+    assert isinstance(stmt.expr, FunctionCall)
+    assert stmt.expr.name == "Piston"
 
 def test_parse_module_def():
     code = """
@@ -33,7 +34,8 @@ module MyMod(x):
     assert mod.name == "MyMod"
     assert mod.params == ["x"]
     assert len(mod.body) == 1
-    assert isinstance(mod.body[0], FunctionCall)
+    assert isinstance(mod.body[0], ExprStmt)
+    assert isinstance(mod.body[0].expr, FunctionCall)
 
 def test_parse_math():
     code = """

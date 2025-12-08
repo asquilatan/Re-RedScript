@@ -41,3 +41,18 @@ A()
     
     with pytest.raises(NameError, match="Unknown block or module: B"):
         interpreter.visit(tree)
+
+
+def test_circular_import_detection(tmp_path, monkeypatch):
+    (tmp_path / "a.rrs").write_text("import b\n", encoding="utf-8")
+    (tmp_path / "b.rrs").write_text("import a\n", encoding="utf-8")
+
+    code = "import a\n"
+    parser = RRSParser()
+    tree = parser.parse(code)
+    interpreter = Interpreter()
+
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(ImportError, match="Circular import"):
+        interpreter.visit(tree)

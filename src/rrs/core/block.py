@@ -30,3 +30,39 @@ class Repeater(Block):
     def __init__(self, pos=(0, 0, 0), facing="north", delay=1, **kwargs):
         super().__init__("minecraft:repeater", pos, facing=facing, delay=delay, **kwargs)
 
+# Decorative Blocks
+class GoldBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:gold_block", pos, **kwargs)
+
+class DiamondBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:diamond_block", pos, **kwargs)
+
+class EmeraldBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:emerald_block", pos, **kwargs)
+
+class Glowstone(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:glowstone", pos, **kwargs)
+
+class SeaLantern(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:sea_lantern", pos, **kwargs)
+
+class RedstoneBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:redstone_block", pos, **kwargs)
+
+class LapisBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:lapis_block", pos, **kwargs)
+
+class IronBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:iron_block", pos, **kwargs)
+
+class Observer(Block):
+    def __init__(self, pos=(0, 0, 0), facing="north", **kwargs):
+        super().__init__("minecraft:observer", pos, facing=facing, **kwargs)

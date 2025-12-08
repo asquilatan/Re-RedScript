@@ -4,19 +4,43 @@
 start: (statement | _NEWLINE)+
 
 statement: module_def
+         | func_def
+         | for_loop
+         | assignment
+         | aug_assignment
+         | import_stmt
+         | from_import_stmt
+         | return_stmt
          | instruction
 
 // Module Definition
 module_def: "module" CNAME _LPAR [params] _RPAR _COLON suite
 
+// Function Definition
+func_def: "def" CNAME _LPAR [params] _RPAR _COLON suite
+
+// For Loop
+for_loop: "for" CNAME "in" expression _COLON suite
+
+// Assignment
+assignment: CNAME _EQUALS expression _NEWLINE
+aug_assignment: CNAME _PLUSEQ expression _NEWLINE
+
+// Imports
+import_stmt: "import" CNAME ["as" CNAME] _NEWLINE
+from_import_stmt: "from" CNAME "import" CNAME (_COMMA CNAME)* _NEWLINE
+
+// Return
+return_stmt: "return" [expression] _NEWLINE
+
 params: CNAME (_COMMA CNAME)*
 
 suite: _NEWLINE _INDENT statement+ _DEDENT
 
-// Instructions
-instruction: function_call _NEWLINE
+// Instructions (Expression statements)
+instruction: expression _NEWLINE
 
-// Function Call
+// Function Call (now an expression)
 function_call: CNAME _LPAR [arguments] _RPAR
 
 arguments: arg (_COMMA arg)*
@@ -37,7 +61,11 @@ arg: expression             -> positional_arg
 
 ?atom: NUMBER           -> number
      | ESCAPED_STRING   -> string
+     | function_call
+     | atom "." CNAME _LPAR [arguments] _RPAR -> method_call
+     | atom "." CNAME   -> getattr
      | CNAME            -> var
+     | "[" [expression (_COMMA expression)*] "]" -> list_expr
      | _LPAR expression _RPAR
      | _LPAR expression (_COMMA expression)+ _RPAR -> tuple
 
@@ -49,16 +77,22 @@ arg: expression             -> positional_arg
 // Named terminals for Indenter
 _LPAR: "("
 _RPAR: ")"
+_LSQB: "["
+_RSQB: "]"
 _COMMA: ","
 _COLON: ":"
 _EQUALS: "="
+_PLUSEQ: "+="
 
 // Custom WS that does not consume newlines
-WS: /[ 	]+/
+WS: /[ \t\f]+/
 %ignore WS
 
+// Comments - ignored at lexer level
 COMMENT: /#[^\n]*/
 %ignore COMMENT
 
-_NEWLINE: /(\r?\n[\t ]*)+/
+// Newline includes optional trailing comment before the actual newline
+// This allows comments on same line as code and comment-only lines in blocks
+_NEWLINE: /(\r?\n[\t ]*(#[^\n]*)?)+/
 %declare _INDENT _DEDENT

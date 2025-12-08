@@ -1,10 +1,228 @@
-module SampleModule(x, y, z):
-    Piston(pos=(x, y, z), facing="up")
-    Repeater(pos=(x + 1, y, z), facing="east", delay=4)
+# ============================================================================
+# Re-RedScript (RRS) Tutorial
+# ============================================================================
+# This script demonstrates RRS features from basic to advanced.
+# Each section builds on the previous, teaching you how to create
+# Minecraft structures programmatically.
+# ============================================================================
 
-module ComplexModule(x, y, z):
-    SampleModule(x, y, z)
-    SampleModule(x+2, y, z)
+# ============================================================================
+# PART 1: Basic Blocks
+# ============================================================================
+# The simplest thing you can do is place individual blocks.
+# Each block takes a position (x, y, z) and optional properties.
 
-# Instantiate top-level module to export it
-ComplexModule(0, 0, 0)
+module Part1_SingleBlocks(x, y, z):
+    # Place a simple stone block
+    Stone(pos=(x, y, z))
+    
+    # Place a gold block next to it
+    GoldBlock(pos=(x + 1, y, z))
+    
+    # Place a piston facing upward
+    Piston(pos=(x + 2, y, z), facing="up")
+    
+    # Place a repeater with custom delay facing east
+    Repeater(pos=(x + 3, y, z), facing="east", delay=4)
+
+# ============================================================================
+# PART 2: Using Variables
+# ============================================================================
+# Variables let you store values and reuse them.
+# You can do math with variables too!
+
+base_height = 10
+spacing = 2
+
+module Part2_Variables(x, y, z):
+    # Use variables in expressions
+    Stone(pos=(x, y + base_height, z))
+    GoldBlock(pos=(x + spacing, y + base_height, z))
+    DiamondBlock(pos=(x + spacing * 2, y + base_height, z))
+
+# ============================================================================
+# PART 3: Loops - Build Towers and Rows
+# ============================================================================
+# Loops let you repeat patterns without writing each block manually.
+# Great for towers, walls, and rows!
+
+module Part3_Tower(x, y, z):
+    # Build a 5-block tower of stone
+    for i in range(5):
+        Stone(pos=(x, y + i, z))
+
+module Part3_GradientRow(x, y, z):
+    # Build a colorful row of gems
+    for i in range(4):
+        GoldBlock(pos=(x + i * 3, y, z))
+        DiamondBlock(pos=(x + i * 3 + 1, y, z))
+        EmeraldBlock(pos=(x + i * 3 + 2, y, z))
+
+# ============================================================================
+# PART 4: Reusable Modules - Define Once, Use Many
+# ============================================================================
+# Modules are like templates - define once, use many times!
+# Great for repeated structures like pillars, walls, or rooms.
+
+module Pillar(x, y, z, height):
+    # Build a pillar of the specified height
+    for i in range(height):
+        Stone(pos=(x, y + i, z))
+    # Cap with glowstone for light
+    Glowstone(pos=(x, y + height, z))
+
+module Part4_Colonnade(x, y, z):
+    # Create a row of pillars with varying heights
+    Pillar(x, y, z, 3)
+    Pillar(x + 4, y, z, 5)
+    Pillar(x + 8, y, z, 7)
+    Pillar(x + 12, y, z, 5)
+    Pillar(x + 16, y, z, 3)
+
+# ============================================================================
+# PART 5: Functions for Calculations
+# ============================================================================
+# Functions let you calculate values and return them.
+# Useful for complex positioning and patterns.
+
+def double(value):
+    return value * 2
+
+def get_height(index):
+    # Create a wave pattern: 2, 4, 6, 4, 2, 4, 6...
+    return 2 + index * 2
+
+module Part5_CalculatedTowers(x, y, z):
+    # Use functions to calculate heights
+    for i in range(5):
+        height = get_height(i)
+        for h in range(height):
+            IronBlock(pos=(x + i * 2, y + h, z))
+
+# ============================================================================
+# PART 6: The Golden Spiral
+# ============================================================================
+# Using trigonometry to create a beautiful spiral pattern!
+# The golden angle (137.5°) creates the most aesthetically pleasing spiral.
+
+module Part6_GoldenSpiral(x, y, z):
+    # Create a spiral using the golden angle
+    golden_angle = 2  # Approximately 137.5 degrees in radians (simplified)
+    scale = 1
+    
+    for i in range(20):
+        # Calculate angle and radius
+        angle = i * golden_angle
+        radius = i * scale
+        
+        # Convert polar to cartesian coordinates
+        dx = floor(cos(angle) * radius)
+        dz = floor(sin(angle) * radius)
+        
+        # Rise as we spiral out
+        GoldBlock(pos=(x + dx, y + i, z + dz))
+
+# ============================================================================
+# PART 7: Randomized Gem Field
+# ============================================================================
+# Add variety with random block selection!
+# Uses randint to pick different block types.
+
+module Part7_GemField(x, y, z):
+    # Create a 6x6 field with randomly chosen gems
+    for row in range(6):
+        for col in range(6):
+            # Randomly select block type (0-2)
+            choice = randint(0, 2)
+            # Place all three types stacked - only top will show
+            # (workaround since we don't have if/else yet)
+            GoldBlock(pos=(x + col, y, z + row))
+    
+    # Add some diamonds scattered on top layer
+    for i in range(4):
+        dx = randint(0, 5)
+        dz = randint(0, 5)
+        DiamondBlock(pos=(x + dx, y + 1, z + dz))
+
+# ============================================================================
+# PART 8: Double Helix (DNA-like)
+# ============================================================================
+# Two intertwined spirals - like the structure of DNA!
+# Uses sin and cos to calculate positions.
+
+module Part8_DoubleHelix(x, y, z):
+    radius = 4
+    height = 25
+    
+    for i in range(height):
+        # Convert height to angle (one rotation every 8 blocks)
+        angle = i * PI / 4
+        
+        # First helix strand (diamonds)
+        dx1 = floor(cos(angle) * radius)
+        dz1 = floor(sin(angle) * radius)
+        DiamondBlock(pos=(x + dx1 + radius, y + i, z + dz1 + radius))
+        
+        # Second helix strand (emeralds, 180° offset)
+        dx2 = floor(cos(angle + PI) * radius)
+        dz2 = floor(sin(angle + PI) * radius)
+        EmeraldBlock(pos=(x + dx2 + radius, y + i, z + dz2 + radius))
+
+# ============================================================================
+# PART 9: Beacon Pyramid
+# ============================================================================
+# A classic 4-layer pyramid shape using nested loops.
+# Each layer is smaller than the one below.
+
+module Part9_BeaconPyramid(x, y, z):
+    # Build 4 layers of decreasing size
+    for layer in range(4):
+        size = 7 - layer * 2  # 7, 5, 3, 1
+        offset = layer
+        
+        # Fill each layer as a square
+        for dx in range(size):
+            for dz in range(size):
+                IronBlock(pos=(x + offset + dx, y + layer, z + offset + dz))
+    
+    # Place sea lantern at the very top as beacon light
+    SeaLantern(pos=(x + 3, y + 4, z + 3))
+
+# ============================================================================
+# MAIN SHOWCASE: View All Examples
+# ============================================================================
+# This module arranges all the examples in a row for easy viewing.
+
+module Tutorial():
+    # Part 1: Basic blocks at origin
+    Part1_SingleBlocks(0, 0, 0)
+    
+    # Part 2: Variables demo
+    Part2_Variables(10, 0, 0)
+    
+    # Part 3: Loops - tower and gradient row
+    Part3_Tower(20, 0, 0)
+    Part3_GradientRow(25, 0, 0)
+    
+    # Part 4: Reusable pillar modules - colonnade
+    Part4_Colonnade(45, 0, 0)
+    
+    # Part 5: Calculated tower heights
+    Part5_CalculatedTowers(70, 0, 0)
+    
+    # Part 6: Golden spiral
+    Part6_GoldenSpiral(90, 0, 0)
+    
+    # Part 7: Random gem field
+    Part7_GemField(130, 0, 0)
+    
+    # Part 8: Double helix (DNA)
+    Part8_DoubleHelix(145, 0, 0)
+    
+    # Part 9: Beacon pyramid
+    Part9_BeaconPyramid(170, 0, 0)
+
+# ============================================================================
+# RUN THE TUTORIAL
+# ============================================================================
+Tutorial()

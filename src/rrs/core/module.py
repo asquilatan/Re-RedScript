@@ -22,6 +22,10 @@ class Module:
         """Add a child module."""
         self.children.append(module)
 
+    def __iadd__(self, module: 'Module'):
+        self.add(module)
+        return self
+
     def flatten(self, offset: Tuple[int, int, int] = (0, 0, 0)) -> List['Module']:
         """
         Recursively flatten the module hierarchy into a list of blocks with absolute positions.

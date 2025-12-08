@@ -1,0 +1,41 @@
+// Re-RedScript (RRS) Grammar Extension
+// Adds imperative features
+
+// Extend statement rule
+statement: module_def
+         | func_def
+         | for_loop
+         | assignment
+         | return_stmt
+         | import_stmt
+         | instruction
+
+// Function Definition
+func_def: "def" CNAME _LPAR [params] _RPAR _COLON suite
+
+// For Loop
+for_loop: "for" CNAME "in" expression _COLON suite
+
+// Assignment
+assignment: CNAME _EQUALS expression _NEWLINE
+
+// Return
+return_stmt: "return" expression _NEWLINE
+
+// Imports
+import_stmt: "import" import_path ["as" CNAME] _NEWLINE
+           | "from" import_path "import" import_list _NEWLINE
+
+import_path: CNAME ("." CNAME)*
+import_list: CNAME ("," CNAME)*
+
+// Extend atom for Lists and Method Calls
+?atom: ... (existing) ...
+     | list_literal
+     | method_call
+     | getattr
+
+list_literal: "[" [expression ("," expression)*] "]"
+
+method_call: atom "." CNAME _LPAR [arguments] _RPAR
+getattr: atom "." CNAME
