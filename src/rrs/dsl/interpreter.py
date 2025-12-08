@@ -105,7 +105,119 @@ class Interpreter:
         # Random functions
         self.globals.set("random", random.random)
         self.globals.set("randint", random.randint)
-
+        self.globals.set("StickyPiston", rrs.StickyPiston)
+        self.globals.set("RedstoneTorch", rrs.RedstoneTorch)
+        self.globals.set("RedstoneLamp", rrs.RedstoneLamp)
+        self.globals.set("NoteBlock", rrs.NoteBlock)
+        self.globals.set("Dispenser", rrs.Dispenser)
+        self.globals.set("Dropper", rrs.Dropper)
+        self.globals.set("Hopper", rrs.Hopper)
+        self.globals.set("Comparator", rrs.Comparator)
+        self.globals.set("Target", rrs.Target)
+        self.globals.set("Lever", rrs.Lever)
+        self.globals.set("LightningRod", rrs.LightningRod)
+        self.globals.set("DaylightDetector", rrs.DaylightDetector)
+        self.globals.set("SculkSensor", rrs.SculkSensor)
+        self.globals.set("TripwireHook", rrs.TripwireHook)
+        self.globals.set("TrappedChest", rrs.TrappedChest)
+        self.globals.set("TNT", rrs.TNT)
+        self.globals.set("RedstoneWire", rrs.RedstoneWire)
+        self.globals.set("OakButton", rrs.OakButton)
+        self.globals.set("StoneButton", rrs.StoneButton)
+        self.globals.set("OakPressurePlate", rrs.OakPressurePlate)
+        self.globals.set("StonePressurePlate", rrs.StonePressurePlate)
+        self.globals.set("LightWeightedPressurePlate", rrs.LightWeightedPressurePlate)
+        self.globals.set("HeavyWeightedPressurePlate", rrs.HeavyWeightedPressurePlate)
+        self.globals.set("Dirt", rrs.Dirt)
+        self.globals.set("GrassBlock", rrs.GrassBlock)
+        self.globals.set("Podzol", rrs.Podzol)
+        self.globals.set("Cobblestone", rrs.Cobblestone)
+        self.globals.set("OakPlanks", rrs.OakPlanks)
+        self.globals.set("SprucePlanks", rrs.SprucePlanks)
+        self.globals.set("BirchPlanks", rrs.BirchPlanks)
+        self.globals.set("JunglePlanks", rrs.JunglePlanks)
+        self.globals.set("AcaciaPlanks", rrs.AcaciaPlanks)
+        self.globals.set("DarkOakPlanks", rrs.DarkOakPlanks)
+        self.globals.set("MangrovePlanks", rrs.MangrovePlanks)
+        self.globals.set("CherryPlanks", rrs.CherryPlanks)
+        self.globals.set("BambooPlanks", rrs.BambooPlanks)
+        self.globals.set("Sand", rrs.Sand)
+        self.globals.set("RedSand", rrs.RedSand)
+        self.globals.set("Gravel", rrs.Gravel)
+        self.globals.set("Glass", rrs.Glass)
+        self.globals.set("TintedGlass", rrs.TintedGlass)
+        self.globals.set("SlimeBlock", rrs.SlimeBlock)
+        self.globals.set("HoneyBlock", rrs.HoneyBlock)
+        self.globals.set("Terracotta", rrs.Terracotta)
+        self.globals.set("WhiteConcrete", rrs.WhiteConcrete)
+        self.globals.set("OrangeConcrete", rrs.OrangeConcrete)
+        self.globals.set("MagentaConcrete", rrs.MagentaConcrete)
+        self.globals.set("LightBlueConcrete", rrs.LightBlueConcrete)
+        self.globals.set("YellowConcrete", rrs.YellowConcrete)
+        self.globals.set("LimeConcrete", rrs.LimeConcrete)
+        self.globals.set("PinkConcrete", rrs.PinkConcrete)
+        self.globals.set("GrayConcrete", rrs.GrayConcrete)
+        self.globals.set("LightGrayConcrete", rrs.LightGrayConcrete)
+        self.globals.set("CyanConcrete", rrs.CyanConcrete)
+        self.globals.set("PurpleConcrete", rrs.PurpleConcrete)
+        self.globals.set("BlueConcrete", rrs.BlueConcrete)
+        self.globals.set("BrownConcrete", rrs.BrownConcrete)
+        self.globals.set("GreenConcrete", rrs.GreenConcrete)
+        self.globals.set("RedConcrete", rrs.RedConcrete)
+        self.globals.set("BlackConcrete", rrs.BlackConcrete)
+        self.globals.set("WhiteTerracotta", rrs.WhiteTerracotta)
+        self.globals.set("OrangeTerracotta", rrs.OrangeTerracotta)
+        self.globals.set("MagentaTerracotta", rrs.MagentaTerracotta)
+        self.globals.set("LightBlueTerracotta", rrs.LightBlueTerracotta)
+        self.globals.set("YellowTerracotta", rrs.YellowTerracotta)
+        self.globals.set("LimeTerracotta", rrs.LimeTerracotta)
+        self.globals.set("PinkTerracotta", rrs.PinkTerracotta)
+        self.globals.set("GrayTerracotta", rrs.GrayTerracotta)
+        self.globals.set("LightGrayTerracotta", rrs.LightGrayTerracotta)
+        self.globals.set("CyanTerracotta", rrs.CyanTerracotta)
+        self.globals.set("PurpleTerracotta", rrs.PurpleTerracotta)
+        self.globals.set("BlueTerracotta", rrs.BlueTerracotta)
+        self.globals.set("BrownTerracotta", rrs.BrownTerracotta)
+        self.globals.set("GreenTerracotta", rrs.GreenTerracotta)
+        self.globals.set("RedTerracotta", rrs.RedTerracotta)
+        self.globals.set("BlackTerracotta", rrs.BlackTerracotta)
+        self.globals.set("WhiteStainedGlass", rrs.WhiteStainedGlass)
+        self.globals.set("OrangeStainedGlass", rrs.OrangeStainedGlass)
+        self.globals.set("MagentaStainedGlass", rrs.MagentaStainedGlass)
+        self.globals.set("LightBlueStainedGlass", rrs.LightBlueStainedGlass)
+        self.globals.set("YellowStainedGlass", rrs.YellowStainedGlass)
+        self.globals.set("LimeStainedGlass", rrs.LimeStainedGlass)
+        self.globals.set("PinkStainedGlass", rrs.PinkStainedGlass)
+        self.globals.set("GrayStainedGlass", rrs.GrayStainedGlass)
+        self.globals.set("LightGrayStainedGlass", rrs.LightGrayStainedGlass)
+        self.globals.set("CyanStainedGlass", rrs.CyanStainedGlass)
+        self.globals.set("PurpleStainedGlass", rrs.PurpleStainedGlass)
+        self.globals.set("BlueStainedGlass", rrs.BlueStainedGlass)
+        self.globals.set("BrownStainedGlass", rrs.BrownStainedGlass)
+        self.globals.set("GreenStainedGlass", rrs.GreenStainedGlass)
+        self.globals.set("RedStainedGlass", rrs.RedStainedGlass)
+        self.globals.set("BlackStainedGlass", rrs.BlackStainedGlass)
+        self.globals.set("PoweredRail", rrs.PoweredRail)
+        self.globals.set("DetectorRail", rrs.DetectorRail)
+        self.globals.set("ActivatorRail", rrs.ActivatorRail)
+        self.globals.set("Rail", rrs.Rail)
+        self.globals.set("Lectern", rrs.Lectern)
+        self.globals.set("WhiteGlazedTerracotta", rrs.WhiteGlazedTerracotta)
+        self.globals.set("OrangeGlazedTerracotta", rrs.OrangeGlazedTerracotta)
+        self.globals.set("MagentaGlazedTerracotta", rrs.MagentaGlazedTerracotta)
+        self.globals.set("LightBlueGlazedTerracotta", rrs.LightBlueGlazedTerracotta)
+        self.globals.set("YellowGlazedTerracotta", rrs.YellowGlazedTerracotta)
+        self.globals.set("LimeGlazedTerracotta", rrs.LimeGlazedTerracotta)
+        self.globals.set("PinkGlazedTerracotta", rrs.PinkGlazedTerracotta)
+        self.globals.set("GrayGlazedTerracotta", rrs.GrayGlazedTerracotta)
+        self.globals.set("LightGrayGlazedTerracotta", rrs.LightGrayGlazedTerracotta)
+        self.globals.set("CyanGlazedTerracotta", rrs.CyanGlazedTerracotta)
+        self.globals.set("PurpleGlazedTerracotta", rrs.PurpleGlazedTerracotta)
+        self.globals.set("BlueGlazedTerracotta", rrs.BlueGlazedTerracotta)
+        self.globals.set("BrownGlazedTerracotta", rrs.BrownGlazedTerracotta)
+        self.globals.set("GreenGlazedTerracotta", rrs.GreenGlazedTerracotta)
+        self.globals.set("RedGlazedTerracotta", rrs.RedGlazedTerracotta)
+        self.globals.set("BlackGlazedTerracotta", rrs.BlackGlazedTerracotta)
     def _next_module_id(self):
         self._module_counter += 1
         return f"anon_module_{self._module_counter}"
@@ -121,7 +233,7 @@ class Interpreter:
         for stmt in program.statements:
             if isinstance(stmt, ModuleDef):
                 self.visit_ModuleDef(stmt)
-        
+
         results = []
         for stmt in program.statements:
             if not isinstance(stmt, ModuleDef):
@@ -143,13 +255,13 @@ class Interpreter:
         for stmt in node.statements:
             if isinstance(stmt, ModuleDef):
                 self.visit_ModuleDef(stmt)
-        
+
         # Execute other statements
         last_result = None
         for stmt in node.statements:
             if not isinstance(stmt, ModuleDef):
                 last_result = self.visit(stmt)
-        
+
         return last_result
 
     def visit_ModuleDef(self, node: ModuleDef):
@@ -176,7 +288,7 @@ class Interpreter:
     def visit_ForLoop(self, node: ForLoop):
         iterable = self.evaluate(node.iterable)
         # iterable should be iterable
-        
+
         for item in iterable:
             self.current_scope.set(node.target, item)
             for stmt in node.body:
@@ -194,24 +306,24 @@ class Interpreter:
     def visit_ImportStmt(self, node: ImportStmt):
         module_name = node.module_name
         alias = node.alias or module_name
-        
+
         if module_name in self.import_cache:
             module_exports = self.import_cache[module_name]
         else:
             module_exports = self.load_module(module_name)
             self.import_cache[module_name] = module_exports
-            
+
         self.current_scope.set(alias, module_exports)
 
     def visit_FromImportStmt(self, node: FromImportStmt):
         module_name = node.module_name
-        
+
         if module_name in self.import_cache:
             module_exports = self.import_cache[module_name]
         else:
             module_exports = self.load_module(module_name)
             self.import_cache[module_name] = module_exports
-            
+
         for name in node.names:
             if hasattr(module_exports, name):
                 val = getattr(module_exports, name)
@@ -222,41 +334,41 @@ class Interpreter:
     def load_module(self, module_name):
         # Lazy import to avoid circular dependency
         from rrs.dsl.parser import RRSParser
-        
+
         filename = f"{module_name}.rrs"
         if module_name in self.import_stack:
             chain = " -> ".join(self.import_stack + [module_name])
             raise ImportError(f"Circular import detected: {chain}")
         if not os.path.exists(filename):
              raise ImportError(f"Module {module_name} not found at {os.path.abspath(filename)}")
-             
+
         parser = RRSParser()
         self.import_stack.append(module_name)
         try:
             program = parser.parse_file(filename)
             nested = Interpreter(import_cache=self.import_cache, import_stack=self.import_stack)
             nested.run(program)
-            
+
             # Merge globals and user-defined modules into exports
             # User-defined modules need to be wrapped so they can be called
             all_exports = dict(nested.globals.symbols)
             for mod_name, mod_def in nested.modules_registry.items():
                 # Create a callable factory for this module definition
                 all_exports[mod_name] = ModuleFactory(mod_def, nested)
-            
+
             exports = ModuleNamespace(all_exports)
         finally:
             self.import_stack.pop()
-        
+
         return exports
 
     def visit_FunctionCall(self, node: FunctionCall):
         func_name = node.name
         obj = self.current_scope.get(func_name)
-        
+
         eval_args = [self.evaluate(arg.value) for arg in node.args]
         eval_kwargs = {kw.name: self.evaluate(kw.value) for kw in node.kwargs}
-        
+
         if isinstance(obj, UserFunction):
             return self.execute_function(obj, eval_args, eval_kwargs)
         elif isinstance(obj, ModuleFactory):
@@ -270,12 +382,12 @@ class Interpreter:
             # If it's a Block class (like Piston), instantiating it returns a Block instance.
             # If we are inside a module, we should add it to the module.
             result = obj(*eval_args, **eval_kwargs)
-            
+
             if isinstance(result, rrs.core.block.Block) and self.current_module:
                 self.current_module.add(result)
-            
+
             return result
-            
+
         elif func_name in self.modules_registry:
             # User defined module
             return self.execute_module(func_name, eval_args, eval_kwargs)
@@ -286,13 +398,13 @@ class Interpreter:
         func_def = func_obj.node
         if len(args) != len(func_def.params):
              raise ValueError(f"Function {func_def.name} expects {len(func_def.params)} args, got {len(args)}")
-             
+
         prev_scope = self.current_scope
         self.current_scope = SymbolTable(parent=func_obj.closure)
-        
+
         for param, val in zip(func_def.params, args):
             self.current_scope.set(param, val)
-            
+
         try:
             for stmt in func_def.body:
                 self.visit(stmt)
@@ -300,28 +412,28 @@ class Interpreter:
             return e.value
         finally:
             self.current_scope = prev_scope
-        
+
         return None
 
     def execute_module(self, name: str, args: List[Any], kwargs: Dict[str, Any]) -> Module:
         def_node = self.modules_registry[name]
-        
+
         if len(args) != len(def_node.params):
              raise ValueError(f"Module {name} expects {len(def_node.params)} args, got {len(args)}")
-             
+
         # Create new scope for module execution
         prev_scope = self.current_scope
         self.current_scope = SymbolTable(parent=self.globals) # Module scope usually isolated from caller, but has access to globals
-        
+
         for param, val in zip(def_node.params, args):
             self.current_scope.set(param, val)
-            
+
         pos = kwargs.get('pos', (0,0,0))
         module_instance = Module(name, pos=pos)
-        
+
         prev_module = self.current_module
         self.current_module = module_instance
-        
+
         returned = None
         try:
             for stmt in def_node.body:
@@ -331,13 +443,13 @@ class Interpreter:
         finally:
             self.current_module = prev_module
             self.current_scope = prev_scope
-            
+
         module_result = self._resolve_module_return(module_instance, returned)
-        
+
         # If called from another module, add it
         if self.current_module:
             self.current_module.add(module_result)
-            
+
         return module_result
 
     def visit_GetAttr(self, node: GetAttr):
@@ -349,13 +461,13 @@ class Interpreter:
     def visit_MethodCall(self, node: MethodCall):
         obj = self.evaluate(node.obj)
         method_name = node.method
-        
+
         if hasattr(obj, method_name):
             method = getattr(obj, method_name)
-            
+
             eval_args = [self.evaluate(arg.value) for arg in node.args]
             eval_kwargs = {kw.name: self.evaluate(kw.value) for kw in node.kwargs}
-            
+
             if isinstance(method, UserFunction):
                 return self.execute_function(method, eval_args, eval_kwargs)
             elif isinstance(method, ModuleFactory):
@@ -377,7 +489,7 @@ class Interpreter:
 
     def evaluate(self, expr, scope=None):
         if scope is None: scope = self.current_scope
-        
+
         if isinstance(expr, Literal):
             return expr.value
         elif isinstance(expr, Variable):
@@ -403,7 +515,7 @@ class Interpreter:
             return self.visit_MethodCall(expr)
         elif isinstance(expr, GetAttr):
             return self.visit_GetAttr(expr)
-            
+
         return None
 
     def _apply_plus_equal(self, current, delta):

@@ -66,3 +66,455 @@ class IronBlock(Block):
 class Observer(Block):
     def __init__(self, pos=(0, 0, 0), facing="north", **kwargs):
         super().__init__("minecraft:observer", pos, facing=facing, **kwargs)
+class StickyPiston(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:sticky_piston", pos, facing=facing, **kwargs)
+
+class RedstoneTorch(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:redstone_torch", pos, **kwargs)
+
+class RedstoneLamp(Block):
+    def __init__(self, pos=(0, 0, 0), lit='false', **kwargs):
+        super().__init__("minecraft:redstone_lamp", pos, lit=lit, **kwargs)
+
+class NoteBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:note_block", pos, **kwargs)
+
+class Dispenser(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:dispenser", pos, facing=facing, **kwargs)
+
+class Dropper(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:dropper", pos, facing=facing, **kwargs)
+
+class Hopper(Block):
+    def __init__(self, pos=(0, 0, 0), facing='down', **kwargs):
+        super().__init__("minecraft:hopper", pos, facing=facing, **kwargs)
+
+class Comparator(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', mode='compare', **kwargs):
+        super().__init__("minecraft:comparator", pos, facing=facing, mode=mode, **kwargs)
+
+class Target(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:target", pos, **kwargs)
+
+class Lever(Block):
+    def __init__(self, pos=(0, 0, 0), face='wall', facing='north', powered='false', **kwargs):
+        super().__init__("minecraft:lever", pos, face=face, facing=facing, powered=powered, **kwargs)
+
+class LightningRod(Block):
+    def __init__(self, pos=(0, 0, 0), facing='up', **kwargs):
+        super().__init__("minecraft:lightning_rod", pos, facing=facing, **kwargs)
+
+class DaylightDetector(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:daylight_detector", pos, **kwargs)
+
+class SculkSensor(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:sculk_sensor", pos, **kwargs)
+
+class TripwireHook(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:tripwire_hook", pos, facing=facing, **kwargs)
+
+class TrappedChest(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:trapped_chest", pos, facing=facing, **kwargs)
+
+class TNT(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:tnt", pos, **kwargs)
+
+class RedstoneWire(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:redstone_wire", pos, **kwargs)
+
+class OakButton(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', face='wall', powered='false', **kwargs):
+        super().__init__("minecraft:oak_button", pos, facing=facing, face=face, powered=powered, **kwargs)
+
+class StoneButton(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', face='wall', powered='false', **kwargs):
+        super().__init__("minecraft:stone_button", pos, facing=facing, face=face, powered=powered, **kwargs)
+
+class OakPressurePlate(Block):
+    def __init__(self, pos=(0, 0, 0), powered='false', **kwargs):
+        super().__init__("minecraft:oak_pressure_plate", pos, powered=powered, **kwargs)
+
+class StonePressurePlate(Block):
+    def __init__(self, pos=(0, 0, 0), powered='false', **kwargs):
+        super().__init__("minecraft:stone_pressure_plate", pos, powered=powered, **kwargs)
+
+class LightWeightedPressurePlate(Block):
+    def __init__(self, pos=(0, 0, 0), power=0, **kwargs):
+        super().__init__("minecraft:light_weighted_pressure_plate", pos, power=power, **kwargs)
+
+class HeavyWeightedPressurePlate(Block):
+    def __init__(self, pos=(0, 0, 0), power=0, **kwargs):
+        super().__init__("minecraft:heavy_weighted_pressure_plate", pos, power=power, **kwargs)
+
+class Dirt(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:dirt", pos, **kwargs)
+
+class GrassBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:grass_block", pos, **kwargs)
+
+class Podzol(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:podzol", pos, **kwargs)
+
+class Cobblestone(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:cobblestone", pos, **kwargs)
+
+class OakPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:oak_planks", pos, **kwargs)
+
+class SprucePlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:spruce_planks", pos, **kwargs)
+
+class BirchPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:birch_planks", pos, **kwargs)
+
+class JunglePlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:jungle_planks", pos, **kwargs)
+
+class AcaciaPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:acacia_planks", pos, **kwargs)
+
+class DarkOakPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:dark_oak_planks", pos, **kwargs)
+
+class MangrovePlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:mangrove_planks", pos, **kwargs)
+
+class CherryPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:cherry_planks", pos, **kwargs)
+
+class BambooPlanks(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:bamboo_planks", pos, **kwargs)
+
+class Sand(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:sand", pos, **kwargs)
+
+class RedSand(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:red_sand", pos, **kwargs)
+
+class Gravel(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:gravel", pos, **kwargs)
+
+class Glass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:glass", pos, **kwargs)
+
+class TintedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:tinted_glass", pos, **kwargs)
+
+class SlimeBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:slime_block", pos, **kwargs)
+
+class HoneyBlock(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:honey_block", pos, **kwargs)
+
+class Terracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:terracotta", pos, **kwargs)
+
+class WhiteConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:white_concrete", pos, **kwargs)
+
+class OrangeConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:orange_concrete", pos, **kwargs)
+
+class MagentaConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:magenta_concrete", pos, **kwargs)
+
+class LightBlueConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_blue_concrete", pos, **kwargs)
+
+class YellowConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:yellow_concrete", pos, **kwargs)
+
+class LimeConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:lime_concrete", pos, **kwargs)
+
+class PinkConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:pink_concrete", pos, **kwargs)
+
+class GrayConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:gray_concrete", pos, **kwargs)
+
+class LightGrayConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_gray_concrete", pos, **kwargs)
+
+class CyanConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:cyan_concrete", pos, **kwargs)
+
+class PurpleConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:purple_concrete", pos, **kwargs)
+
+class BlueConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:blue_concrete", pos, **kwargs)
+
+class BrownConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:brown_concrete", pos, **kwargs)
+
+class GreenConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:green_concrete", pos, **kwargs)
+
+class RedConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:red_concrete", pos, **kwargs)
+
+class BlackConcrete(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:black_concrete", pos, **kwargs)
+
+class WhiteTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:white_terracotta", pos, **kwargs)
+
+class OrangeTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:orange_terracotta", pos, **kwargs)
+
+class MagentaTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:magenta_terracotta", pos, **kwargs)
+
+class LightBlueTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_blue_terracotta", pos, **kwargs)
+
+class YellowTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:yellow_terracotta", pos, **kwargs)
+
+class LimeTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:lime_terracotta", pos, **kwargs)
+
+class PinkTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:pink_terracotta", pos, **kwargs)
+
+class GrayTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:gray_terracotta", pos, **kwargs)
+
+class LightGrayTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_gray_terracotta", pos, **kwargs)
+
+class CyanTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:cyan_terracotta", pos, **kwargs)
+
+class PurpleTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:purple_terracotta", pos, **kwargs)
+
+class BlueTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:blue_terracotta", pos, **kwargs)
+
+class BrownTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:brown_terracotta", pos, **kwargs)
+
+class GreenTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:green_terracotta", pos, **kwargs)
+
+class RedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:red_terracotta", pos, **kwargs)
+
+class BlackTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:black_terracotta", pos, **kwargs)
+
+class WhiteStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:white_stained_glass", pos, **kwargs)
+
+class OrangeStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:orange_stained_glass", pos, **kwargs)
+
+class MagentaStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:magenta_stained_glass", pos, **kwargs)
+
+class LightBlueStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_blue_stained_glass", pos, **kwargs)
+
+class YellowStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:yellow_stained_glass", pos, **kwargs)
+
+class LimeStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:lime_stained_glass", pos, **kwargs)
+
+class PinkStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:pink_stained_glass", pos, **kwargs)
+
+class GrayStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:gray_stained_glass", pos, **kwargs)
+
+class LightGrayStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:light_gray_stained_glass", pos, **kwargs)
+
+class CyanStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:cyan_stained_glass", pos, **kwargs)
+
+class PurpleStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:purple_stained_glass", pos, **kwargs)
+
+class BlueStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:blue_stained_glass", pos, **kwargs)
+
+class BrownStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:brown_stained_glass", pos, **kwargs)
+
+class GreenStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:green_stained_glass", pos, **kwargs)
+
+class RedStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:red_stained_glass", pos, **kwargs)
+
+class BlackStainedGlass(Block):
+    def __init__(self, pos=(0, 0, 0), **kwargs):
+        super().__init__("minecraft:black_stained_glass", pos, **kwargs)
+
+
+class PoweredRail(Block):
+    def __init__(self, pos=(0, 0, 0), shape='north_south', powered='false', **kwargs):
+        super().__init__("minecraft:powered_rail", pos, shape=shape, powered=powered, **kwargs)
+
+class DetectorRail(Block):
+    def __init__(self, pos=(0, 0, 0), shape='north_south', powered='false', **kwargs):
+        super().__init__("minecraft:detector_rail", pos, shape=shape, powered=powered, **kwargs)
+
+class ActivatorRail(Block):
+    def __init__(self, pos=(0, 0, 0), shape='north_south', powered='false', **kwargs):
+        super().__init__("minecraft:activator_rail", pos, shape=shape, powered=powered, **kwargs)
+
+class Rail(Block):
+    def __init__(self, pos=(0, 0, 0), shape='north_south', **kwargs):
+        super().__init__("minecraft:rail", pos, shape=shape, **kwargs)
+
+class Lectern(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', has_book='false', **kwargs):
+        super().__init__("minecraft:lectern", pos, facing=facing, has_book=has_book, **kwargs)
+
+class WhiteGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:white_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class OrangeGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:orange_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class MagentaGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:magenta_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class LightBlueGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:light_blue_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class YellowGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:yellow_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class LimeGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:lime_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class PinkGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:pink_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class GrayGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:gray_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class LightGrayGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:light_gray_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class CyanGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:cyan_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class PurpleGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:purple_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class BlueGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:blue_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class BrownGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:brown_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class GreenGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:green_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class RedGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:red_glazed_terracotta", pos, facing=facing, **kwargs)
+
+class BlackGlazedTerracotta(Block):
+    def __init__(self, pos=(0, 0, 0), facing='north', **kwargs):
+        super().__init__("minecraft:black_glazed_terracotta", pos, facing=facing, **kwargs)
