@@ -3,19 +3,22 @@
 
 start: (statement | _NEWLINE)+
 
-statement: module_def
-         | func_def
-         | for_loop
-         | while_loop
-         | if_stmt
-         | assignment
-         | aug_assignment
-         | import_stmt
-         | from_import_stmt
-         | return_stmt
-         | simulate_stmt
-         | instruction
-         | assert_stmt
+statement: compound_stmt | simple_stmt
+
+compound_stmt: module_def
+             | func_def
+             | for_loop
+             | while_loop
+             | if_stmt
+             | simulate_stmt
+
+simple_stmt: assignment
+           | aug_assignment
+           | import_stmt
+           | from_import_stmt
+           | return_stmt
+           | instruction
+           | assert_stmt
 
 // Assert
 assert_stmt: "assert" expression [_COMMA expression] _NEWLINE
@@ -39,9 +42,11 @@ for_loop: "for" CNAME "in" expression _COLON suite
 while_loop: "while" expression _COLON suite
 
 // If/Elif/Else
-if_stmt: "if" expression _COLON suite elif_clause* [else_clause]
-elif_clause: "elif" expression _COLON suite
-else_clause: "else" _COLON suite
+if_stmt: "if" expression _COLON suite_or_simple elif_clause* [else_clause]
+elif_clause: "elif" expression _COLON suite_or_simple
+else_clause: "else" _COLON suite_or_simple
+
+suite_or_simple: suite | simple_stmt
 
 // Assignment
 assignment: CNAME _EQUALS expression _NEWLINE
@@ -98,6 +103,7 @@ arg: expression             -> positional_arg
 ?product: unary
         | product "*" unary  -> mul
         | product "/" unary  -> div
+        | product "%" unary  -> mod
 
 ?unary: atom
       | "-" unary -> neg

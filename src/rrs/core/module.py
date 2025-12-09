@@ -19,6 +19,8 @@ class Module:
         self.properties: Dict[str, Any] = kwargs
         # Block registry for name-based access
         self._block_registry: Dict[str, 'Module'] = {}
+        # Variable registry for module attribute access (exports)
+        self.exports: Dict[str, Any] = {}
         # Optional trigger callback
         self.trigger = None
 
@@ -38,12 +40,14 @@ class Module:
         return None
 
     def __getattr__(self, name: str):
-        """Allow access to registered blocks via m.block_name"""
+        """Allow access to registered blocks and exported variables"""
         if name.startswith('_'):
             raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
         if name in self._block_registry:
             return self._block_registry[name]
-        raise AttributeError(f"Module '{self.id}' has no block named '{name}'")
+        if name in self.exports:
+            return self.exports[name]
+        raise AttributeError(f"Module '{self.id}' has no attribute named '{name}'")
 
     def __getitem__(self, key: Union[str, List[str]]) -> Union['Module', List['Module']]:
         """Allow indexing: m['block'] or m[b1, b2, b3]"""

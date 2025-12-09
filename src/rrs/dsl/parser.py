@@ -21,6 +21,18 @@ class RRSTransformer(Transformer):
     def statement(self, items):
         return items[0]
 
+    def compound_stmt(self, items):
+        return items[0]
+
+    def simple_stmt(self, items):
+        return items[0]
+
+    def suite_or_simple(self, items):
+        item = items[0]
+        if isinstance(item, list):
+            return item
+        return [item]
+
     def module_def(self, items):
         # items: [Token(module), CNAME, params?, suite]
         # We rely on finding CNAME and suite
@@ -279,7 +291,7 @@ class RRSTransformer(Transformer):
         method = str(items[1])
         args = []
         kwargs = []
-        if len(items) > 2:
+        if len(items) > 2 and items[2] is not None:
             args, kwargs = items[2]
         return MethodCall(obj=obj, method=method, args=args, kwargs=kwargs)
 
@@ -295,6 +307,7 @@ class RRSTransformer(Transformer):
     def sub(self, items): return BinaryOp(left=items[0], op='-', right=items[1])
     def mul(self, items): return BinaryOp(left=items[0], op='*', right=items[1])
     def div(self, items): return BinaryOp(left=items[0], op='/', right=items[1])
+    def mod(self, items): return BinaryOp(left=items[0], op='%', right=items[1])
 
     def eq(self, items): return BinaryOp(left=items[0], op='==', right=items[1])
     def ne(self, items): return BinaryOp(left=items[0], op='!=', right=items[1])

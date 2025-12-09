@@ -683,16 +683,26 @@ class Interpreter:
         self.current_module = module_instance
 
         returned = None
+        module_scope = None
         try:
             for stmt in def_node.body:
                 self.visit(stmt)
+            # Capture scope before exiting
+            module_scope = self.current_scope
         except ReturnException as ret:
             returned = ret.value
+            module_scope = self.current_scope
         finally:
             self.current_module = prev_module
             self.current_scope = prev_scope
 
         module_result = self._resolve_module_return(module_instance, returned)
+
+        # Populate module exports from the executed scope
+        if isinstance(module_result, Module) and module_scope:
+            for name, val in module_scope.symbols.items():
+                if not name.startswith('_'):
+                    module_result.exports[name] = val
 
         # Auto-add is now handled by visit_ExprStmt, not here
         return module_result
@@ -749,6 +759,7 @@ class Interpreter:
             if expr.op == '-': return l - r
             if expr.op == '*': return l * r
             if expr.op == '/': return l / r
+            if expr.op == '%': return l % r
             if expr.op == '==': return l == r
             if expr.op == '!=': return l != r
             if expr.op == '<': return l < r
