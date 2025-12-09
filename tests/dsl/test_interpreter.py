@@ -14,7 +14,8 @@ def test_interpreter_simple():
 module MyMod(x):
     Piston(pos=(x,0,0))
 
-MyMod(10)
+m = MyMod(10)
+export(m)
 """
     parser = RRSParser()
     program = parser.parse(code)
@@ -44,7 +45,8 @@ module Main(z):
     Sub(z)
     Sub(z+1)
 
-Main(5)
+m = Main(5)
+export(m)
 """
     parser = RRSParser()
     program = parser.parse(code)

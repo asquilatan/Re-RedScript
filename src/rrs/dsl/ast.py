@@ -119,6 +119,18 @@ class GetAttr(Expr):
     attr: str
 
 @dataclass
+class SimulateStmt(Statement):
+    """Simulate((module, ticks) => { ... })"""
+    module_var: str  # Variable name for the module
+    ticks: Optional[Expr]  # Number of ticks, None for infinite
+    body: List[Statement]  # Statements inside the callback
+
+@dataclass
+class TriggerBlock(Statement):
+    """trigger: ... block inside a module"""
+    body: List[Statement]
+
+@dataclass
 class AssertStmt(Statement):
     test: Expr
     msg: Optional[Expr] = None

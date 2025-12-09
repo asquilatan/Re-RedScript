@@ -36,7 +36,8 @@ def test_module_return_override_with_add():
         container.add(piston)
         return container
 
-    Custom()
+    c = Custom()
+    export(c)
     """
     _, results = run_script(code)
     assert len(results) == 1
@@ -54,7 +55,8 @@ def test_module_plus_equal_adds_block():
         container += Stone(pos=(0, 1, 0))
         return container
 
-    Custom()
+    c = Custom()
+    export(c)
     """
     _, results = run_script(code)
     assert len(results) == 1
@@ -73,7 +75,8 @@ def test_module_plus_equal_accepts_nested_modules():
         container += child
         return container
 
-    Builder()
+    b = Builder()
+    export(b)
     """
     _, results = run_script(code)
     assert len(results) == 1

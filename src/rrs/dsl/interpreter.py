@@ -5,9 +5,10 @@ from rrs.core.block import Block
 from rrs.dsl.ast import (
     Program, ModuleDef, FunctionCall, Literal, Variable, BinaryOp, TupleExpr,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt, ImportStmt, FromImportStmt,
-    MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt
+    MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt, SimulateStmt, TriggerBlock
 )
 from typing import Dict, Any, List, Optional
+import sys
 
 class ModuleNamespace:
     """Simple wrapper exposing interpreter globals as module-like attributes."""
@@ -69,6 +70,8 @@ class Interpreter:
         self._module_counter = 0
         self.exports: List[Module] = []  # Modules marked for export
         self._auto_add = True  # Whether to auto-add blocks to current module
+        # Active SimulationEngine when executing within a Simulate() block
+        self._current_simulation = None
 
     def register_builtins(self):
         import math
@@ -78,6 +81,11 @@ class Interpreter:
         self.globals.set("range", range)
         self.globals.set("print", print)
         self.globals.set("Module", self._create_module)
+        
+        # Boolean/None literals
+        self.globals.set("True", True)
+        self.globals.set("False", False)
+        self.globals.set("None", None)
         
         # Math functions
         self.globals.set("sin", math.sin)
@@ -99,6 +107,11 @@ class Interpreter:
         
         # Add function - explicitly add block/module to current module
         self.globals.set("add", self._add_to_current_module)
+
+        # Simulation helpers
+        self.globals.set("Simulate", self.func_Simulate)
+        self.globals.set("Trigger", self.func_Trigger)
+        self.globals.set("ChangeState", self.func_ChangeState)
 
         # Auto-generated registrations
         self.globals.set("Block", rrs.Block)
@@ -255,6 +268,90 @@ class Interpreter:
         else:
             raise TypeError(f"add() requires a Block or Module, got {type(item).__name__}")
 
+    # ------------------------------------------------------------------
+    # Simulation builtins
+    # ------------------------------------------------------------------
+
+    def func_Simulate(self, module: Module, ticks: Optional[int] = None, assertion_block=None):
+        """Built-in function: Simulate(module, ticks=None, assertion_block=None).
+
+        This is a thin wrapper around :class:`SimulationEngine`.  When an
+        ``assertion_block`` callable is provided it is executed after the
+        simulation; the return value is ``True`` if all assertions pass
+        and ``False`` if an :class:`AssertionError` is raised.
+        """
+        from rrs.core.simulation import SimulationEngine
+
+        if not isinstance(module, Module):
+            raise TypeError(f"Simulate() expects a Module, got {type(module).__name__}")
+
+        engine = SimulationEngine(module, ticks=ticks)
+        prev_engine = self._current_simulation
+        self._current_simulation = engine
+        try:
+            engine.run()
+
+            if assertion_block is None:
+                # No special assertion handling requested; return the
+                # (potentially modified) module like a normal function.
+                return module
+
+            # Python-side assertions block: expected to raise
+            # AssertionError on failure.
+            try:
+                if callable(assertion_block):
+                    assertion_block(engine)
+                return True
+            except AssertionError:
+                return False
+        finally:
+            self._current_simulation = prev_engine
+
+    def func_Trigger(self, module: Module):
+        """Built-in function: Trigger(module).
+
+        If called inside a Simulate() context it uses the active
+        SimulationEngine; otherwise a temporary engine is created.
+        """
+        from rrs.core.simulation import SimulationEngine
+
+        if not isinstance(module, Module):
+            raise TypeError(f"Trigger() expects a Module, got {type(module).__name__}")
+
+        engine = self._current_simulation or SimulationEngine(module, ticks=None)
+
+        # Naive implementation: notify all blocks in the module.  More
+        # sophisticated scenarios can pass smaller modules.
+        for blk in module.flatten():
+            if isinstance(blk, Block):
+                engine.trigger_update(blk.pos)
+
+        engine.run()
+
+        # Outside of a simulation context we simply return the module so
+        # that scripts can chain calls if they wish.
+        return module
+
+    def func_ChangeState(self, block: Block, property: str, value):
+        """Built-in function: ChangeState(block, prop, val).
+
+        During a Simulate() call this mutates the corresponding
+        SimulatedBlock's properties in the active SimulationEngine.
+        """
+        if not isinstance(block, Block):
+            raise TypeError(f"ChangeState() expects a Block, got {type(block).__name__}")
+
+        engine = self._current_simulation
+        if engine is None:
+            raise RuntimeError("ChangeState() can only be used inside Simulate()")
+
+        sim_block = engine.get_block(block.pos)
+        if sim_block is None:
+            raise ValueError(f"No simulated block found at position {block.pos}")
+
+        sim_block.properties[property] = value
+        return block
+
     def run(self, program: Program) -> List[Module]:
         # Register ModuleDefs first
         for stmt in program.statements:
@@ -275,6 +372,54 @@ class Interpreter:
 
     def generic_visit(self, node):
         raise NotImplementedError(f"No visit_{node.__class__.__name__} method")
+
+    def visit_SimulateStmt(self, node: SimulateStmt):
+        """Handle Simulate((module, ticks) => { ... }) syntax.
+        
+        Executes body statements within a simulation context.
+        If an AssertionError occurs and result is not assigned,
+        prints error and exits with code 1.
+        """
+        from rrs.core.simulation import SimulationEngine
+        
+        # Get the module variable
+        module = self.current_scope.get(node.module_var)
+        if not isinstance(module, Module):
+            raise TypeError(f"Simulate() expects a Module, got {type(module).__name__}")
+        
+        # Get tick count
+        ticks = None
+        if node.ticks is not None:
+            ticks = self.evaluate(node.ticks)
+        
+        # Create simulation engine
+        engine = SimulationEngine(module, ticks=ticks)
+        prev_engine = self._current_simulation
+        self._current_simulation = engine
+        
+        has_assert = False
+        assertion_failed = False
+        
+        try:
+            engine.run()
+            
+            # Execute body statements
+            for stmt in node.body:
+                if isinstance(stmt, AssertStmt):
+                    has_assert = True
+                self.visit(stmt)
+        except AssertionError as e:
+            assertion_failed = True
+            # Print error and exit with code 1
+            print(f"Simulation assertion failed: {e}", file=sys.stderr)
+            sys.exit(1)
+        finally:
+            self._current_simulation = prev_engine
+        
+        # Return based on assert behavior
+        if has_assert:
+            return not assertion_failed
+        return module
 
     def visit_Program(self, node: Program):
         # Register ModuleDefs first
@@ -312,6 +457,12 @@ class Interpreter:
         val = self.evaluate(node.value)
         self._auto_add = prev_auto_add
         self.current_scope.set(node.target, val)
+        
+        # Register blocks in module's block registry for name-based access
+        if self.current_module and isinstance(val, (Block, Module)):
+            self.current_module.register_block(node.target, val)
+            # Also add the block to the module
+            self.current_module.add(val)
 
     def visit_AugAssignment(self, node: AugAssignment):
         current = self.current_scope.get(node.target)
@@ -485,10 +636,7 @@ class Interpreter:
 
         module_result = self._resolve_module_return(module_instance, returned)
 
-        # If called from another module, add it
-        if self.current_module:
-            self.current_module.add(module_result)
-
+        # Auto-add is now handled by visit_ExprStmt, not here
         return module_result
 
     def visit_GetAttr(self, node: GetAttr):

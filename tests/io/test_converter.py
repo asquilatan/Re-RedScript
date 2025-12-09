@@ -24,7 +24,8 @@ def _build_sample_module():
             Stone(pos=(0, 0, 0))
             Block("minecraft:oak_log", pos=(1, 0, 0), axis="x")
         
-        Sample()
+        s = Sample()
+        export(s)
         """
     )
     parser = RRSParser()
@@ -65,4 +66,4 @@ def test_converter_generates_reasonable_defaults(tmp_path):
     assert os.path.exists(output_path)
     contents = Path(output_path).read_text(encoding="utf-8")
     assert "module HouseSchematic()" in contents
-    assert "HouseSchematic()" in contents.splitlines()[-2]
+    assert "export(m)" in contents
