@@ -1,0 +1,265 @@
+# Gothic House Replication - Optimized Version
+# Based on reference image - medieval/gothic architecture
+
+# ===== COMPONENT MODULES =====
+
+module Pillar(height, width):
+    # Tall tower pillar with cyan windows
+    base_mat = "minecraft:stone_bricks"
+    
+    # Base foundation
+    for x in range(width):
+        for z in range(width):
+            Block("minecraft:polished_deepslate", pos=(x, 0, z))
+
+    for y in range(1, height):
+        for x in range(width):
+            for z in range(width):
+                # Hollow pillar - walls only
+                if x == 0 or x == width - 1 or z == 0 or z == width - 1:
+                    # Cornice Flare at top
+                    if y == height - 1:
+                        # Upside down stairs for flare
+                        if x == 0:
+                            Block("minecraft:stone_brick_stairs", pos=(x, y, z), facing="east", half="top")
+                        elif x == width - 1:
+                            Block("minecraft:stone_brick_stairs", pos=(x, y, z), facing="west", half="top")
+                        elif z == 0:
+                            Block("minecraft:stone_brick_stairs", pos=(x, y, z), facing="south", half="top")
+                        elif z == width - 1:
+                            Block("minecraft:stone_brick_stairs", pos=(x, y, z), facing="north", half="top")
+                    
+                    # Windows at intervals
+                    elif y % 4 == 2:
+                        Block("minecraft:cyan_stained_glass", pos=(x, y, z))
+                    else:
+                        Block(base_mat, pos=(x, y, z))
+
+module Window(width, height):
+    # Multi-block window with cyan stained glass
+    for x in range(width):
+        for y in range(height):
+            Block("minecraft:cyan_stained_glass", pos=(x, y, 0))
+    
+    # Frame around window
+    for x in range(-1, width + 1):
+        if x == -1 or x == width:
+            # Side shutters using trapdoors
+            for y in range(height):
+                Block("minecraft:spruce_trapdoor", pos=(x, y, 0), facing="north", open="true")
+        else:
+            # Top/Bottom frame
+            Block("minecraft:spruce_planks", pos=(x, -1, 0))
+            Block("minecraft:spruce_planks", pos=(x, height, 0))
+
+module Door(width, height):
+    # Gothic arched door
+    for y in range(height):
+        for x in range(width):
+            # Create arch shape at top
+            if y == height - 1:
+                if x > 0 and x < width - 1:
+                    Block("minecraft:air", pos=(x, y, 0))
+                else:
+                    Block("minecraft:dark_oak_stairs", pos=(x, y, 0), half="top") # Arch detail
+            elif y < height - 1:
+                Block("minecraft:air", pos=(x, y, 0))
+    
+    # Door frame columns
+    for y in range(height):
+        Block("minecraft:polished_deepslate_wall", pos=(-1, y, 0))
+        Block("minecraft:polished_deepslate_wall", pos=(width, y, 0))
+    
+    # Top Lintel
+    for x in range(-1, width + 1):
+        Block("minecraft:polished_deepslate", pos=(x, height, 0))
+
+module Floor(width, depth):
+    # Stone floor
+    for x in range(width):
+        for z in range(depth):
+            if (x + z) % 2 == 0:
+                Block("minecraft:stone_bricks", pos=(x, 0, z))
+            else:
+                Block("minecraft:cobblestone", pos=(x, 0, z))
+
+module Wall(length, height):
+    # Wall segment with occasional windows
+    for x in range(length):
+        for y in range(height):
+            # Base trim
+            if y == 0:
+                Block("minecraft:polished_deepslate", pos=(x, y, 0))
+            
+            # Add windows at intervals
+            elif x % 6 == 3 and y >= 3 and y < height - 2 and y < 6:
+                Block("minecraft:cyan_stained_glass", pos=(x, y, 0))
+            else:
+                Block("minecraft:stone_bricks", pos=(x, y, 0))
+
+module PeakedRoof(width, depth, peak_height):
+    # A-Frame Roof using Stairs for smoothness
+    # Roof runs along Z axis (peak runs along X axis? No, typically peak runs along longest dimension)
+    # Let's say peak runs along Z axis, so slopes are on X axis sides.
+    
+    # We will build two slopes meeting in middle X
+    center_x = width / 2
+    
+    for x in range(width):
+        # Calculate height for this x based on distance from center
+        # Simple 1:1 slope (45 degrees)
+        
+        dist_from_edge = x
+        if x >= center_x:
+            dist_from_edge = width - 1 - x
+        
+        # Height increases as we go in
+        y = dist_from_edge
+        
+        # Determining stair state
+        stair_facing = "east" # Face towards +X
+        if x >= center_x:
+            stair_facing = "west" # Face towards -X
+            
+        for z in range(depth):
+            # Place the stair
+            Block("minecraft:spruce_stairs", pos=(x, y, z), facing=stair_facing)
+            
+            # Place filler block underneath if needed (so it's not floating air inside)
+            for fill_y in range(y):
+               if fill_y == y - 1:
+                   Block("minecraft:spruce_planks", pos=(x, fill_y, z))
+
+    # Add stone border on the front/back faces (gables)
+    for y in range(int(width/2)):
+         x_left = y
+         x_right = width - 1 - y
+         Block("minecraft:cobblestone_stairs", pos=(x_left, y, 0), facing="east")
+         Block("minecraft:cobblestone_stairs", pos=(x_right, y, 0), facing="west")
+         Block("minecraft:cobblestone_stairs", pos=(x_left, y, depth-1), facing="east")
+         Block("minecraft:cobblestone_stairs", pos=(x_right, y, depth-1), facing="west")
+
+module TowerTop(width):
+    # Decorative spire top
+    # Use walls for thin spires
+    
+    # Center spire
+    center = int(width / 2)
+    for y in range(5):
+        Block("minecraft:cobblestone_wall", pos=(center, y, center))
+        
+    # Corner mini-spires
+    for x in [0, width-1]:
+        for z in [0, width-1]:
+            for y in range(3):
+                Block("minecraft:cobblestone_wall", pos=(x, y, z))
+
+# ===== MAIN HOUSE MODULE =====
+
+module GothicHouse():
+    # Main dimensions - smaller for efficiency
+    base_width = 20
+    base_depth = 16
+    base_height = 10
+    tower_width = 4
+    tower_height = 15
+    
+    # Floor
+    Floor(base_width, base_depth)
+    
+    # Front left tower
+    Pillar(tower_height, tower_width, pos=(0, 1, 0))
+    TowerTop(tower_width, pos=(0, tower_height + 1, 0))
+    
+    # Front right tower
+    Pillar(tower_height, tower_width, pos=(base_width - tower_width, 1, 0))
+    TowerTop(tower_width, pos=(base_width - tower_width, tower_height + 1, 0))
+    
+    # Back left tower
+    Pillar(tower_height, tower_width, pos=(0, 1, base_depth - tower_width))
+    TowerTop(tower_width, pos=(0, tower_height + 1, base_depth - tower_width))
+    
+    # Back right tower
+    Pillar(tower_height, tower_width, pos=(base_width - tower_width, 1, base_depth - tower_width))
+    TowerTop(tower_width, pos=(base_width - tower_width, tower_height + 1, base_depth - tower_width))
+    
+    # Front wall with door
+    Wall(base_width, base_height, pos=(0, 1, 0))
+    Door(4, 6, pos=(int(base_width / 2) - 2, 1, 0))
+    
+    # Back wall
+    Wall(base_width, base_height, pos=(0, 1, base_depth))
+    
+    # Left wall (rotated)
+    for z in range(base_depth):
+        for y in range(base_height):
+            # Windows at intervals
+            if z % 6 == 3 and y >= 3 and y < base_height - 2 and y < 6:
+                Block("minecraft:cyan_stained_glass", pos=(0, y + 1, z))
+            else:
+                Block("minecraft:brick", pos=(0, y + 1, z))
+    
+    # Right wall (rotated)
+    for z in range(base_depth):
+        for y in range(base_height):
+            if z % 6 == 3 and y >= 3 and y < base_height - 2 and y < 6:
+                Block("minecraft:cyan_stained_glass", pos=(base_width - 1, y + 1, z))
+            else:
+                Block("minecraft:brick", pos=(base_width - 1, y + 1, z))
+    
+    # Main peaked roof
+    PeakedRoof(base_width, base_depth, 12, pos=(0, base_height + 1, 0))
+    
+    # Add decorative windows on upper walls
+    Window(3, 4, pos=(6, 6, 0))
+    Window(3, 4, pos=(base_width - 9, 6, 0))
+    
+    # Side turrets (smaller)
+    small_tower_w = 3
+    small_tower_h = 12
+    
+    Pillar(small_tower_h, small_tower_w, pos=(int(base_width / 3), 1, -1))
+    TowerTop(small_tower_w, pos=(int(base_width / 3), small_tower_h + 1, -1))
+    
+    Pillar(small_tower_h, small_tower_w, pos=(int(base_width * 2 / 3), 1, -1))
+    TowerTop(small_tower_w, pos=(int(base_width * 2 / 3), small_tower_h + 1, -1))
+
+# ===== PLACEMENT GRID =====
+
+# Create houses in a loose grid relative to a 200x200x200 area inside ONE module
+module HouseGrid():
+    count = 0
+    
+    # 10x10x10 = 1000 houses target
+    houses_per_side = 10 # Demo size
+    base_spacing = 20
+    
+    for i in range(houses_per_side):
+        for j in range(houses_per_side):
+            for k in range(houses_per_side):
+                # Add random offset to break the grid
+                off_x = randint(-8, 8)
+                off_z = randint(-8, 8)
+                off_y = randint(0, 5) # Slight height variation
+                
+                x = (i * base_spacing) + off_x
+                y = (j * base_spacing) + off_y
+                z = (k * base_spacing) + off_z
+                
+                # Make sure we're strictly positive and within bounds
+                if x < 0:
+                    x = 0
+                if y < 0:
+                    y = 0
+                if z < 0:
+                    z = 0
+                
+                if x < 200 and y < 200 and z < 200:
+                    GothicHouse(pos=(x, y, z))
+                    count += 1
+    
+    print("Generated " + str(count) + " houses in organic grid")
+
+# Create and export the single grid module
+grid = HouseGrid()
+export(grid)

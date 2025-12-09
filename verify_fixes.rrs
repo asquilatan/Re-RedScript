@@ -1,0 +1,25 @@
+# verify_fixes.rrs
+
+module AttributesTest():
+    my_val = 100
+    my_str = "hello"
+
+print("--- Testing Modulo ---")
+# Modulo test
+a = 10 % 3
+print("10 % 3 = " + str(a))
+if a == 1:
+    print("Modulo PASS")
+else:
+    print("Modulo FAIL")
+
+print("--- Testing Module Attributes ---")
+# Attribute test
+m = AttributesTest()
+print("Reading m.my_val (expect 100): " + str(m.my_val))
+print("Reading m.my_str (expect hello): " + m.my_str)
+
+if m.my_val == 100 and m.my_str == "hello":
+    print("Attributes PASS")
+else:
+    print("Attributes FAIL")

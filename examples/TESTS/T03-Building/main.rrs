@@ -1,0 +1,104 @@
+# main.rrs
+# The "Crazy Nether Build" Assembly
+
+import common
+import paths
+import watchtower
+import house
+
+# === Layout Configuration ===
+# 256x256 Area
+area_size = 256
+center = area_size / 2
+
+
+module NetherWorld():
+    # === 1. The Watchtower (Centerpiece) ===
+    # It dominates the skyline
+    watchtower_h = 60
+    # Note: Modules instantiated inside another module are automatically added to it
+    watchtower.NetherWatchtower(watchtower_h, pos=(int(center), 0, int(center)))
+
+    # === 2. The Village (Houses) ===
+    # We place them in a rough circle/scatter pattern
+    house_count = 6
+    house_positions = []
+
+    for i in range(house_count):
+        # Random position, but kept away from center (20 block radius)
+        angle = (6.28 / house_count) * i + common.random() # 2*PI approx 6.28
+        dist = common.randint(30, 80)
+        
+        hx = int(center + sin(angle) * dist)
+        hz = int(center + cos(angle) * dist)
+        
+        w = common.randint(8, 12)
+        d = common.randint(8, 12)
+        
+        house.NetherHouse(w, d, pos=(hx, 0, hz))
+        
+        # Store center for pathing
+        # List support is basic, we store specific coords
+        append(house_positions, hx + w/2)
+        append(house_positions, hz + d/2)
+        
+    # === 3. The Paths (Connecting everything) ===
+    # Connect Watchtower to each House
+    wt_x = center
+    wt_z = center
+
+    # Since list of lists might be tricky depending on RRS version, we used a flat list [x1, z1, x2, z2...]
+    count = int(len(house_positions) / 2)
+    for i in range(count):
+        idx_x = i * 2
+        idx_z = i * 2 + 1
+        
+        h_cx = house_positions[idx_x]
+        h_cz = house_positions[idx_z]
+        
+        # Basic path to center
+        paths.NetherPath(wt_x, wt_z, h_cx, h_cz, 3, 1.5)
+        
+        # Connect to next house (Ring road)
+        next_i = common.mod(i + 1, count)
+        
+        # We need to explicitly cast indices to int because standard division might return float in python, 
+        # though common.mod returns float if inputs are float. 
+        # However, indices calculations earlier:
+        # idx_x = i * 2. i is from range(), so int.
+        # count is from len()/2. Python 3 / is float.
+        # So we should ensure integers.
+        # Better:
+        # next_i = int(next_i)
+        next_i = int(next_i)
+        
+        next_x = house_positions[next_i * 2]
+        next_z = house_positions[next_i * 2 + 1]
+        
+        # Wacky connection
+        paths.NetherPath(h_cx, h_cz, next_x, next_z, 2, 2.0)
+
+    # === 4. Environmental Chaos (Ruins, Spikes, Fire) ===
+    # Scatter some random debris
+    for i in range(50):
+        rx = common.randint(20, area_size - 20)
+        rz = common.randint(20, area_size - 20)
+        
+        # Check simple distance to center to avoid clipping watchtower base too much
+        dx = rx - center
+        dz = rz - center
+        if sqrt(dx*dx + dz*dz) > 15:
+            if common.chance(0.3):
+                 # Fire geyser
+                 Block("minecraft:basalt", pos=(rx, 0, rz))
+                 Block("minecraft:netherrack", pos=(rx, 1, rz))
+                 Block("minecraft:fire", pos=(rx, 2, rz))
+            elif common.chance(0.2):
+                 # Random pillar
+                 h = common.randint(3, 8)
+                 for y in range(h):
+                     Block("minecraft:basalt", pos=(rx, y, rz), axis="y")
+
+# Instantiate and Export
+world = NetherWorld()
+export(world)

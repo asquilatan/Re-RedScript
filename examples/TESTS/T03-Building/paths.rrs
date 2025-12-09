@@ -1,0 +1,63 @@
+# paths.rrs
+import common
+
+module NetherPath(start_x, start_z, end_x, end_z, width, complexity):
+    # Create a winding path from start to end
+    # complexity: how much it deviates from the straight line
+    path_blocks = [
+        "minecraft:soul_sand",
+        "minecraft:soul_soil",
+        "minecraft:gravel",
+        "minecraft:basalt",
+        "minecraft:netherrack"
+    ]
+    
+    dx = end_x - start_x
+    dz = end_z - start_z
+    dist = sqrt(dx * dx + dz * dz)
+    
+    steps = int(dist * 1.5) # More steps than distance to allow for curves
+    
+    for i in range(steps):
+        t = i / steps
+        
+        # Linear interpolation
+        base_x = start_x + dx * t
+        base_z = start_z + dz * t
+        
+        # Add "wacky" noise (sine waves)
+        offset_x = sin(t * 10 * complexity) * 5 * complexity
+        offset_z = cos(t * 8 * complexity) * 5 * complexity
+        
+        current_x = base_x + offset_x
+        current_z = base_z + offset_z
+        
+        # Draw the path at this segment (width)
+        # We draw a small circle/square around the point
+        r = width / 2
+        r_int = int(width)
+        
+        start_r = -1 * int(width / 2)
+        end_r = int(width / 2) + 1
+        
+        for wx in range(start_r, end_r):
+            for wz in range(start_r, end_r):
+                # Circular brush check
+                if sqrt(wx*wx + wz*wz) <= r:
+                    px = int(current_x + wx)
+                    pz = int(current_z + wz)
+                    
+                    # Randomize block
+                    blk = common.get_random_block(path_blocks)
+                    
+                    # Layering: Main path block + maybe some detail above/below
+                    Block(blk, pos=(px, 0, pz))
+                    
+                    # chance for detail above (fire? buttons? obscure nether vegetation?)
+                    if common.chance(0.05):
+                        Block("minecraft:crimson_roots", pos=(px, 1, pz))
+                    elif common.chance(0.02):
+                        Block("minecraft:warped_roots", pos=(px, 1, pz))
+                    elif common.chance(0.01):
+                        Block("minecraft:fire", pos=(px, 1, pz))
+

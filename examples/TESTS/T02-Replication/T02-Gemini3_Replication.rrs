@@ -1,0 +1,153 @@
+# T02-Gemini3_Replication.rrs
+# Procedural generation of a "Damask" floral rug pattern (256x256)
+# Pure RRS implementation without external libraries
+
+module FloralRug(width, depth):
+    # === Palettes ===
+    # Lighter blocks for the "pattern" (Cyan/Light Blue theme based on user request "lighter shade")
+    # Using the user's reference image description "turquoise/blue"
+    
+    # Light/Pattern palette (Light Blue / Cyan / White)
+    light_blocks = [
+        "minecraft:light_blue_wool",
+        "minecraft:light_blue_concrete",
+        "minecraft:light_blue_terracotta",
+        "minecraft:cyan_wool",
+        "minecraft:cyan_concrete",
+        "minecraft:diamond_block",
+        "minecraft:oxidized_copper",
+        "minecraft:prismarine_bricks"
+    ]
+    
+    # Dark/Background palette (Blue / Dark Blue / Cyan Glazed)
+    dark_blocks = [
+        "minecraft:blue_wool",
+        "minecraft:blue_concrete",
+        "minecraft:blue_terracotta",
+        "minecraft:lapis_block",
+        "minecraft:blue_glazed_terracotta",
+        "minecraft:cyan_terracotta",
+        "minecraft:dark_prismarine"
+    ]
+    
+    light_count = len(light_blocks)
+    dark_count = len(dark_blocks)
+    
+    center_x = width / 2
+    center_z = depth / 2
+    
+    # === Generation Loop ===
+    for x in range(width):
+        for z in range(depth):
+            
+            # 1. Coordinate Normalization
+            # Shift to center relative
+            dx = x - center_x
+            dz = z - center_z
+            
+            # Polar coordinates
+            dist = sqrt(dx * dx + dz * dz)
+            angle = atan2(dz, dx)
+            
+            # Normalize distance (0.0 at center, ~1.0 at edge)
+            norm_dist = dist / center_x
+            
+            # 2. Procedural Pattern Logic (The "Damask" Shader)
+            
+            # Base logic: Is this pixel part of the light pattern?
+            is_light = False
+            
+            # --- A. Central Medallion (Flower) ---
+            # 8 petals, varying with distance
+            petals = cos(8 * angle)
+            # Add secondary petals
+            petals2 = cos(16 * angle)
+            
+            if norm_dist < 0.25:
+                # Core flower
+                val = petals * 0.5 + 0.5 # 0..1
+                # Ring modulation
+                ring = sin(dist * 0.5)
+                if val + ring * 0.3 > 0.6:
+                    is_light = True
+            
+            # --- B. Scrollwork / Vines (Mid-range) ---
+            elif norm_dist < 0.85: # Expanded range
+                # Coordinate warping for "organic" feel
+                # Increased warp intensity for more "distortion"
+                warped_angle = angle + sin(dist * 0.15) * 0.8
+                warped_dist = dist + cos(angle * 6) * 5
+                
+                # Layer 1: Main radial vines
+                vine_radial = sin(12 * warped_angle)
+                
+                # Layer 2: Overlapping spirals (counter-rotating)
+                overlap_spiral = sin(10 * (angle - dist * 0.05))
+                
+                # Combine layers for "overlapping" effect
+                # If either pattern is strong, we paint light
+                if vine_radial > 0.3:
+                    is_light = True
+                elif overlap_spiral > 0.5:
+                     is_light = True
+                
+                # Add flourishes
+                flourish = cos(warped_dist * 0.4 + 4 * angle)
+                if vine_radial > 0.1:
+                    if flourish > 0.4:
+                        is_light = True
+            
+            # --- C. Border Region ---
+            else:
+                # Simple ornate border - Removed Grid
+                dist_from_edge = 0
+                
+                abs_dx = abs(dx)
+                abs_dz = abs(dz)
+                
+                edge_x = center_x - abs_dx
+                edge_z = center_z - abs_dz
+                min_edge = min(edge_x, edge_z)
+                
+                # Solid rims only, no grid
+                if min_edge < 4:
+                    is_light = True
+                elif min_edge < 8:
+                    is_light = False
+                elif min_edge < 12:
+                    is_light = True
+                elif min_edge < 15:
+                    is_light = False
+                else:
+                    # Inner rim
+                    is_light = True
+                    
+            # 3. Noise & Dithering
+            noise = random()
+            if noise < 0.05:
+                if is_light:
+                    is_light = False
+                else:
+                    is_light = True
+            
+            # 4. Block Placement
+            # Layer 1: Base Blocks
+            if is_light:
+                idx = randint(0, light_count)
+                if idx >= light_count:
+                    idx = light_count - 1
+                Block(light_blocks[idx], pos=(x, 0, z))
+            else:
+                idx = randint(0, dark_count)
+                if idx >= dark_count:
+                    idx = dark_count - 1
+                Block(dark_blocks[idx], pos=(x, 0, z))
+            
+            # Layer 2: Glass Cover
+            # User requested "top part is covered in light blue glass"
+            Block("minecraft:light_blue_stained_glass", pos=(x, 1, z))
+
+# Instantiate
+# 256x256
+rug = FloralRug(256, 256)
+export(rug)

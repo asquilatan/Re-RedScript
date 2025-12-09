@@ -1,0 +1,58 @@
+module GoldCircle(radius):
+    gold_blocks = ["minecraft:gold_block", "minecraft:yellow_wool", "minecraft:yellow_concrete", "minecraft:yellow_terracotta", "minecraft:raw_gold_block"]
+    black_blocks = ["minecraft:black_concrete", "minecraft:obsidian", "minecraft:coal_block", "minecraft:black_wool", "minecraft:black_terracotta"]
+    
+    # Iterate over a square bounding box centered at 0,0
+    range_limit = radius + 1
+    # Note: range() in RRS currently supports single arg or start,end. 
+    # To go from -radius to radius, we need to adjust standard range usage or use negative if supported.
+    # Assuming range(start, end) supports negatives based on standard python behavior.
+    
+    for x in range(0 - radius, radius + 1):
+        for z in range(0 - radius, radius + 1):
+            dist = sqrt(x * x + z * z)
+            
+            if dist <= radius:
+                # Calculate angle for floral pattern
+                angle = atan2(z, x)
+                
+                # 8 petals, using sine wave
+                # sin(8 * angle) gives values -1 to 1.
+                # We want a nice floral shape.
+                # Let's say if sin(8 * angle) > 0.3 it is "petal" (Gold), else background (Black)
+                # Adding some noise or variation could be cool too, but keeping it simple for now as per plan.
+                
+                pattern_val = sin(8 * angle)
+                
+                # Create a "center" gold area for nicer look
+                if dist < 5:
+                     is_gold = True
+                elif pattern_val > 0:
+                     is_gold = True
+                else:
+                     is_gold = False
+                     
+                if is_gold:
+                    # Random gold block
+                    idx = randint(0, 5) # 0 to 4
+                    # Safety check for index, though randint is usually inclusive/exclusive depending on impl. 
+                    # Python's random.randint is inclusive, but RRS might be different? 
+                    # Docs say: randint(a, b) Random integer a to b. Assuming inclusive.
+                    if idx >= 5:
+                        idx = 4
+                    block_type = gold_blocks[idx]
+                    Block(block_type, pos=(x, 0, z))
+                    Block("minecraft:yellow_stained_glass", pos=(x, 1, z))
+                else:
+                    # Random black block
+                    idx = randint(0, 5)
+                    if idx >= 5:
+                        idx = 4
+                    block_type = black_blocks[idx]
+                    Block(block_type, pos=(x, 0, z))
+                    Block("minecraft:black_stained_glass", pos=(x, 1, z))
+
+# Instantiate and export
+# Radius 50 as requested
+circle = GoldCircle(50)
+export(circle)

@@ -1,0 +1,73 @@
+# common.rrs
+# Shared palettes and utility functions for the Nether Build
+
+
+def get_base_palette():
+    # 1. Base Materials (Netherrack variants)
+    return [
+        "minecraft:netherrack",
+        "minecraft:nether_bricks",
+        "minecraft:red_nether_bricks",
+        "minecraft:cracked_nether_bricks"
+    ]
+
+def get_crimson_palette():
+    # 2. Crimson Theme
+    return [
+        "minecraft:crimson_planks",
+        "minecraft:crimson_stem",
+        "minecraft:stripped_crimson_stem",
+        "minecraft:crimson_hyphae",
+        "minecraft:red_wool", # Accent
+        "minecraft:red_concrete" # Accent
+    ]
+
+def get_warped_palette():
+    # 3. Warped Theme (Contrast)
+    return [
+        "minecraft:warped_planks",
+        "minecraft:warped_stem",
+        "minecraft:stripped_warped_stem",
+        "minecraft:cyan_wool",
+        "minecraft:warped_wart_block"
+    ]
+
+def get_dark_palette():
+    # 4. Industrial/Dark Theme (Blackstone/Basalt)
+    return [
+        "minecraft:blackstone",
+        "minecraft:polished_blackstone",
+        "minecraft:polished_blackstone_bricks",
+        "minecraft:basalt",
+        "minecraft:polished_basalt",
+        "minecraft:obsidian",
+        "minecraft:crying_obsidian"
+    ]
+
+def get_lights_palette():
+    # 5. Lights
+    return [
+        "minecraft:shroomlight",
+        "minecraft:glowstone",
+        "minecraft:soul_lantern" 
+    ]
+
+# Utility Functions
+
+def get_random_block(block_list):
+    # Returns a random block string from the list
+    # Assumes block_list is a valid list of strings
+    count = len(block_list)
+    idx = randint(0, count)
+    if idx >= count:
+        idx = count - 1
+    return block_list[idx]
+
+def chance(probability):
+    # Returns True with a given probability (0.0 to 1.0)
+    return random() < probability
+
+def mod(a, b):
+    # Manual modulo implementation: a % b
+    # a - floor(a / b) * b
+    return a - floor(a / b) * b

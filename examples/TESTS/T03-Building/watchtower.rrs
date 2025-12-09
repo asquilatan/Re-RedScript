@@ -1,0 +1,113 @@
+# watchtower.rrs
+import common
+
+module WatchtowerBase(radius, height):
+    pal_dark = common.get_dark_palette()
+    # A sturdy base using dark blocks
+    
+    for y in range(height):
+        # Tapering effect
+        current_radius = radius - (y / height) * 2
+        for x in range(-int(radius), int(radius)+1):
+            for z in range(-int(radius), int(radius)+1):
+                dist = sqrt(x*x + z*z)
+                if dist <= current_radius:
+                    if dist > current_radius - 1.5:
+                        # Wall
+                        blk = common.get_random_block(pal_dark)
+                        Block(blk, pos=(x, y, z))
+                    else:
+                        # Floor/Interior (fill with lava occasionally for fun?)
+                         if y == 0:
+                             Block("minecraft:nether_bricks", pos=(x, y, z))
+                         elif common.chance(0.05):
+                             Block("minecraft:lava", pos=(x, y, z))
+
+module WatchtowerShaft(radius, height):
+    pal_crimson = common.get_crimson_palette()
+    pal_base = common.get_base_palette()
+    
+    for y in range(height):
+        # Wobbly shaft
+        wobble_x = sin(y * 0.5) * 2
+        wobble_z = cos(y * 0.5) * 2
+        
+        center_x = int(wobble_x)
+        center_z = int(wobble_z)
+        
+        for x in range(center_x - int(radius), center_x + int(radius) + 1):
+             for z in range(center_z - int(radius), center_z + int(radius) + 1):
+                local_x = x - center_x
+                local_z = z - center_z
+                dist = sqrt(local_x*local_x + local_z*local_z)
+                
+                if dist <= radius and dist > radius - 1:
+                    # Alternating pattern
+                    # if (y + x + z) % 3 == 0:
+                    val = y + x + z
+                    if common.mod(val, 3) == 0:
+                         blk = common.get_random_block(pal_crimson)
+                    else:
+                         blk = common.get_random_block(pal_base)
+                    
+                    Block(blk, pos=(x, y, z))
+                    
+                    # Windows
+                    if common.chance(0.05):
+                        Block("minecraft:obsidian", pos=(x, y, z)) # "Bars"
+                
+                # Internal ladder/spirals could be added here
+
+module WatchtowerTop(radius):
+    
+    # Flared top
+    for y in range(8):
+        current_radius = radius + (y * 0.8)
+        
+        for x in range(-int(current_radius), int(current_radius)+1):
+            for z in range(-int(current_radius), int(current_radius)+1):
+                dist = sqrt(x*x + z*z)
+                
+                if dist <= current_radius:
+                    if y == 0:
+                        # Floor
+                        Block("minecraft:quartz_bricks", pos=(x, y, z))
+                    elif dist > current_radius - 1:
+                        # Spiky railing
+                        if common.mod(y, 2) == 0:
+                             Block("minecraft:red_nether_bricks", pos=(x, y, z))
+                        else:
+                            if common.chance(0.5):
+                                Block("minecraft:nether_brick_fence", pos=(x, y, z))
+    
+    # Roof (Pointy and weird)
+    roof_height = 15
+    for y in range(roof_height):
+        roof_radius = (radius + 6) * (1 - (y / roof_height))
+        for x in range(-int(roof_radius), int(roof_radius)+1):
+             for z in range(-int(roof_radius), int(roof_radius)+1):
+                 dist = sqrt(x*x + z*z)
+                 if dist <= roof_radius and dist > roof_radius - 1.5:
+                     Block("minecraft:blackstone", pos=(x, y+8, z))
+
+module NetherWatchtower(height):
+    base_h = 10
+    shaft_h = height - base_h - 20 # Reserved for top
+    if shaft_h < 5:
+        shaft_h = 5
+        
+    # Assemble parts
+    WatchtowerBase(6, base_h)
+    
+    # Shaft starts where base ends, but we need to offset positions manually in main assembly or use relative placement
+    # Since RRS modules place blocks relatively, calling a module inside another module just adds its blocks to the current context.
+    # So we need to shift the context or pass offset.
+    # WAIT: Standard RRS `Block` takes pos. If I call `WatchtowerShaft` inside `NetherWatchtower`, its blocks are added.
+    # BUT `WatchtowerShaft` loops `for y in range(height)`. It starts at local y=0.
+    # I need to use the `pos` argument on the Module instantiation to shift it!
+    # "Modules can be instantiated with a pos argument" -> `Shaft(..., pos=(0, base_h, 0))`
+    
+    WatchtowerShaft(4, shaft_h, pos=(0, base_h, 0))
+    
+    top_y = base_h + shaft_h
+    WatchtowerTop(5, pos=(0, top_y, 0))

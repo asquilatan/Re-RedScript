@@ -1,0 +1,101 @@
+# house.rrs
+import common
+
+module HouseSegment(width, depth, height, material_set):
+    # A single room/floor
+    
+    wall_block = material_set[0]
+    floor_block = material_set[1]
+    deco_block = material_set[2]
+    
+    for y in range(height):
+        for x in range(width):
+            for z in range(depth):
+                # Floor
+                if y == 0:
+                    Block(floor_block, pos=(x, y, z))
+                # Walls
+                elif x == 0 or x == width - 1 or z == 0 or z == depth - 1:
+                    # Windows
+                    if y == 2 and (x > 1 and x < width - 2 and z > 1 and z < depth - 2):
+                         if common.chance(0.3):
+                             Block("minecraft:nether_brick_fence", pos=(x, y, z))
+                         else:
+                             Block(wall_block, pos=(x, y, z))
+                    else:
+                        Block(wall_block, pos=(x, y, z))
+                        
+                    # Exterior detail
+                    val = x + z
+                    if common.mod(val, 2) == 0 and common.chance(0.2):
+                         Block(deco_block, pos=(x, y, z), facing="north") # Just random detail
+                         
+module HouseRoof(width, depth, material_set):
+    # Crazy roof - inverted pyramid or jagged
+    roof_type = common.randint(0, 3)
+    roof_block = material_set[0]
+    
+    if roof_type == 0:
+        # Standard Pyramid
+        h = max(int(width/2), int(depth/2))
+        for y in range(h):
+            for x in range(y, width - y):
+                for z in range(y, depth - y):
+                    if x == y or x == width - y - 1 or z == y or z == depth - y - 1:
+                        Block(roof_block, pos=(x, y, z))
+    elif roof_type == 1:
+        # Flat with spikes
+        for x in range(width):
+            for z in range(depth):
+                Block(roof_block, pos=(x, 0, z))
+                if common.chance(0.1):
+                    pole_h = common.randint(2, 5)
+                    for ph in range(pole_h):
+                        Block("minecraft:nether_brick_fence", pos=(x, ph+1, z))
+    else:
+         # Inverted Pyramid (Wacky)
+         h = max(int(width/2), int(depth/2))
+         for y in range(h):
+             current_w = width + y * 2
+             current_d = depth + y * 2
+             offset = -y
+             
+             for x in range(current_w):
+                 for z in range(current_d):
+                     if x == 0 or x == current_w - 1 or z == 0 or z == current_d - 1:
+                         Block(roof_block, pos=(x + offset, y, z + offset))
+
+
+module NetherHouse(width, depth):
+    # Choose a theme
+    theme_id = common.randint(0, 2)
+    
+    if theme_id == 0:
+        mat = common.get_crimson_palette()
+    else:
+        mat = common.get_warped_palette()
+        
+    floors = common.randint(1, 4)
+    current_y = 0
+    
+    for f in range(floors):
+        # Vary size slightly
+        w_var = width + common.randint(-1, 2)
+        d_var = depth + common.randint(-1, 2)
+        h_var = 4 + common.randint(0, 2)
+        
+        # Center the variance
+        off_x = int((width - w_var) / 2)
+        off_z = int((depth - d_var) / 2)
+        
+        HouseSegment(w_var, d_var, h_var, mat, pos=(off_x, current_y, off_z))
+        current_y += h_var
+        
+    # Roof on top
+    HouseRoof(width, depth, mat, pos=(0, current_y, 0))
+    
+    # Maybe a side wing?
+    if common.chance(0.6):
+        wing_w = int(width * 0.6)
+        wing_d = int(depth * 0.6)
+        HouseSegment(wing_w, wing_d, 4, mat, pos=(width, 0, 2))
