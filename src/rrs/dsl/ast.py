@@ -118,4 +118,9 @@ class GetAttr(Expr):
     obj: Expr
     attr: str
 
+@dataclass
+class AssertStmt(Statement):
+    test: Expr
+    msg: Optional[Expr] = None
+
 ASTNode = Node

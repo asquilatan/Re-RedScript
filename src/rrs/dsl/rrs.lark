@@ -12,6 +12,10 @@ statement: module_def
          | from_import_stmt
          | return_stmt
          | instruction
+         | assert_stmt
+
+// Assert
+assert_stmt: "assert" expression [_COMMA expression] _NEWLINE
 
 // Module Definition
 module_def: "module" CNAME _LPAR [params] _RPAR _COLON suite
@@ -49,7 +53,15 @@ arg: expression             -> positional_arg
    | CNAME _EQUALS expression   -> keyword_arg
 
 // Expressions
-?expression: sum
+?expression: comparison
+
+?comparison: sum
+           | sum "==" sum -> eq
+           | sum "!=" sum -> ne
+           | sum "<" sum -> lt
+           | sum ">" sum -> gt
+           | sum "<=" sum -> le
+           | sum ">=" sum -> ge
 
 ?sum: product
     | sum "+" product   -> add

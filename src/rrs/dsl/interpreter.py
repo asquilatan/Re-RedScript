@@ -5,7 +5,7 @@ from rrs.core.block import Block
 from rrs.dsl.ast import (
     Program, ModuleDef, FunctionCall, Literal, Variable, BinaryOp, TupleExpr,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt, ImportStmt, FromImportStmt,
-    MethodCall, GetAttr, ExprStmt, Arg, Kwarg
+    MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt
 )
 from typing import Dict, Any, List, Optional
 
@@ -67,6 +67,8 @@ class Interpreter:
         self.import_cache = import_cache if import_cache is not None else {}
         self.import_stack = import_stack if import_stack is not None else []
         self._module_counter = 0
+        self.exports: List[Module] = []  # Modules marked for export
+        self._auto_add = True  # Whether to auto-add blocks to current module
 
     def register_builtins(self):
         import math
@@ -91,6 +93,12 @@ class Interpreter:
         # Assertion
         from rrs.core.assertion import rrs_assert
         self.globals.set("assert", rrs_assert)
+        
+        # Export function
+        self.globals.set("export", self._export_module)
+        
+        # Add function - explicitly add block/module to current module
+        self.globals.set("add", self._add_to_current_module)
 
         # Auto-generated registrations
         self.globals.set("Block", rrs.Block)
@@ -229,19 +237,36 @@ class Interpreter:
             id = self._next_module_id()
         return Module(id, pos=pos, size=size, **kwargs)
 
+    def _export_module(self, module: Module):
+        """Mark a module for export. Called via export(m) in RRS scripts."""
+        if not isinstance(module, Module):
+            raise TypeError(f"export() requires a Module, got {type(module).__name__}")
+        self.exports.append(module)
+        return module
+
+    def _add_to_current_module(self, item):
+        """Add a block or module to the current module. Called via add(item) in RRS scripts."""
+        if self.current_module is None:
+            raise RuntimeError("add() can only be called inside a module definition")
+        
+        if isinstance(item, (Block, Module)):
+            self.current_module.add(item)
+            return item
+        else:
+            raise TypeError(f"add() requires a Block or Module, got {type(item).__name__}")
+
     def run(self, program: Program) -> List[Module]:
         # Register ModuleDefs first
         for stmt in program.statements:
             if isinstance(stmt, ModuleDef):
                 self.visit_ModuleDef(stmt)
 
-        results = []
         for stmt in program.statements:
             if not isinstance(stmt, ModuleDef):
-                res = self.visit(stmt)
-                if isinstance(res, Module):
-                    results.append(res)
-        return results
+                self.visit(stmt)
+        
+        # Return explicitly exported modules
+        return self.exports
 
     def visit(self, node):
         method_name = 'visit_' + node.__class__.__name__
@@ -269,10 +294,23 @@ class Interpreter:
         self.modules_registry[node.name] = node
 
     def visit_ExprStmt(self, node: ExprStmt):
-        return self.visit(node.expr)
+        # Expression statements auto-add blocks/modules
+        prev_auto_add = self._auto_add
+        self._auto_add = True
+        result = self.evaluate(node.expr)
+        self._auto_add = prev_auto_add
+        
+        # If result is a Block or Module and we're in a module, add it
+        if self.current_module and isinstance(result, (Block, Module)):
+            self.current_module.add(result)
+        return result
 
     def visit_Assignment(self, node: Assignment):
+        # Assignments do NOT auto-add
+        prev_auto_add = self._auto_add
+        self._auto_add = False
         val = self.evaluate(node.value)
+        self._auto_add = prev_auto_add
         self.current_scope.set(node.target, val)
 
     def visit_AugAssignment(self, node: AugAssignment):
@@ -303,6 +341,14 @@ class Interpreter:
         if node.value:
             value = self.evaluate(node.value)
         raise ReturnException(value)
+
+    def visit_AssertStmt(self, node: AssertStmt):
+        test_val = self.evaluate(node.test)
+        if not test_val:
+            msg = "Assertion failed"
+            if node.msg:
+                msg = str(self.evaluate(node.msg))
+            raise AssertionError(msg)
 
     def visit_ImportStmt(self, node: ImportStmt):
         module_name = node.module_name
@@ -373,20 +419,12 @@ class Interpreter:
         if isinstance(obj, UserFunction):
             return self.execute_function(obj, eval_args, eval_kwargs)
         elif isinstance(obj, ModuleFactory):
-            # Imported DSL module - call it and add result to current module
+            # Imported DSL module
             result = obj(*eval_args, **eval_kwargs)
-            if isinstance(result, Module) and self.current_module:
-                self.current_module.add(result)
             return result
         elif obj:
             # Builtin Block class or function
-            # If it's a Block class (like Piston), instantiating it returns a Block instance.
-            # If we are inside a module, we should add it to the module.
             result = obj(*eval_args, **eval_kwargs)
-
-            if isinstance(result, rrs.core.block.Block) and self.current_module:
-                self.current_module.add(result)
-
             return result
 
         elif func_name in self.modules_registry:
@@ -505,6 +543,12 @@ class Interpreter:
             if expr.op == '-': return l - r
             if expr.op == '*': return l * r
             if expr.op == '/': return l / r
+            if expr.op == '==': return l == r
+            if expr.op == '!=': return l != r
+            if expr.op == '<': return l < r
+            if expr.op == '>': return l > r
+            if expr.op == '<=': return l <= r
+            if expr.op == '>=': return l >= r
         elif isinstance(expr, TupleExpr):
             return tuple(self.evaluate(e, scope) for e in expr.elements)
         elif isinstance(expr, ListExpr):

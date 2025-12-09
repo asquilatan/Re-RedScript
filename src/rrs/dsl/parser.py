@@ -5,7 +5,8 @@ from .ast import (
     Program, ModuleDef, FunctionCall, Arg, Kwarg,
     Literal, Variable, BinaryOp, TupleExpr, Statement,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt,
-    ImportStmt, FromImportStmt, MethodCall, GetAttr, ExprStmt
+    ImportStmt, FromImportStmt, MethodCall, GetAttr, ExprStmt,
+    AssertStmt
 )
 
 GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "rrs.lark")
@@ -120,6 +121,15 @@ class RRSTransformer(Transformer):
              value = items[0]
         return ReturnStmt(value=value)
 
+    def assert_stmt(self, items):
+        # "assert" expression [_COMMA expression] _NEWLINE
+        # items: [test, msg?]
+        test = items[0]
+        msg = None
+        if len(items) > 1:
+            msg = items[1]
+        return AssertStmt(test=test, msg=msg)
+
     def params(self, items):
         return [str(token) for token in items]
 
@@ -207,6 +217,13 @@ class RRSTransformer(Transformer):
     def sub(self, items): return BinaryOp(left=items[0], op='-', right=items[1])
     def mul(self, items): return BinaryOp(left=items[0], op='*', right=items[1])
     def div(self, items): return BinaryOp(left=items[0], op='/', right=items[1])
+
+    def eq(self, items): return BinaryOp(left=items[0], op='==', right=items[1])
+    def ne(self, items): return BinaryOp(left=items[0], op='!=', right=items[1])
+    def lt(self, items): return BinaryOp(left=items[0], op='<', right=items[1])
+    def gt(self, items): return BinaryOp(left=items[0], op='>', right=items[1])
+    def le(self, items): return BinaryOp(left=items[0], op='<=', right=items[1])
+    def ge(self, items): return BinaryOp(left=items[0], op='>=', right=items[1])
 
 class RRSParser:
     def __init__(self):
