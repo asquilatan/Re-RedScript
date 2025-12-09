@@ -1,0 +1,17 @@
+from std import Path
+
+module SmoothPath():
+    # A smooth curved path passing through points
+    points = [
+        (0,0,0),
+        (10,5,0),
+        (20,5,10),
+        (30,0,10)
+    ]
+    
+    # smooth=True uses spline interpolation
+    p = Path(points, "minecraft:gold_block", thickness=1, smooth=True)
+    add(p)
+
+sp = SmoothPath()
+export(sp)

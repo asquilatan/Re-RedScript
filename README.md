@@ -165,6 +165,36 @@ Block("minecraft:diamond_block", pos=(0, 0, 0))
 - `facing`: `"north"`, `"south"`, `"east"`, `"west"`, `"up"`, `"down"`.
 - `delay`: `1`, `2`, `3`, `4`.
 
+### Standard Library (New!)
+
+RRS includes a standard library of helper functions for geometry and path finding. Import them from `std`.
+
+```python
+from std import Line, Bezier, Weighted, Cuboid
+
+module MyBuild():
+    # Draw a line
+    l = Line((0,0,0), (10,5,0), Stone)
+    add(l)
+
+    # Draw a curved path
+    # Weighted Randomization with Dictionary Syntax
+    palette = Weighted({
+        Dirt: 0.8,
+        GrassBlock: 0.2
+    })
+    c = Cuboid((0,0,0), (5,5,5), palette, fill=True)
+    add(c)
+
+    m = Module("MyPart")
+    m.add(Block("minecraft:glass"))
+    Line(start, end, m)
+
+    # Paths can now be smooth (Catmull-Rom spline)
+    p = Path(points, "minecraft:gold_block", smooth=True)
+    add(p)
+```
+
 ### Variables
 
 Variables can store values or blocks. Note that assigning a block to a variable does **not** automatically add it to the module; you must use `add()`.
@@ -201,6 +231,10 @@ for i in range(5):
 
 if height > 10:
     print("Tall structure")
+
+# Single-line conditionals are also supported
+if height < 5: print("Short structure")
+ else: print("Average structure")
 ```
 
 ### Imports

@@ -1,0 +1,14 @@
+from std import Path
+
+module NormalPath():
+    points = [
+        (0,0,0),
+        (15,0,0),
+        (15,0,15)
+    ]
+    
+    p = Path(points, "minecraft:grass_block")
+    add(p)
+
+np = NormalPath()
+export(np)

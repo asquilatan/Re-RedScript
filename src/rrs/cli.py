@@ -48,7 +48,9 @@ def compile_file(input_path, output_path=None):
     program = parser_dsl.parse_file(input_path)
     
     print("Interpreting...")
-    interpreter = Interpreter()
+    # Use input file's directory as base directory for import resolution
+    input_dir = os.path.dirname(os.path.abspath(input_path))
+    interpreter = Interpreter(base_dir=input_dir)
     results = interpreter.run(program)
     
     if not results:

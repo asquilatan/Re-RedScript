@@ -1,0 +1,14 @@
+from std import Path
+
+module SharpPath():
+    # A standard sharp path connecting points with lines
+    points = [
+        (0,0,0),
+        (10,5,0),
+        (20,5,10),
+        (30,0,10)
+    ]
+    
+    # smooth=False is default
+    p = Path(points, "minecraft:stone_bricks", thickness=1, smooth=False)
+    add(p)

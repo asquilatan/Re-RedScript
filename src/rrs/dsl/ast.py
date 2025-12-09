@@ -86,6 +86,11 @@ class ListExpr(Expr):
     elements: List[Expr]
 
 @dataclass
+class DictExpr(Expr):
+    # pairs is a list of (key_expr, value_expr) tuples
+    pairs: List[tuple]
+
+@dataclass
 class ForLoop(Statement):
     target: str
     iterable: Expr

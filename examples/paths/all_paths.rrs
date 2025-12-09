@@ -1,0 +1,21 @@
+from path_sharp import SharpPath
+from path_smooth import SmoothPath
+from path_custom_2x2 import CustomPath
+from path_normal import NormalPath
+
+module AllPaths():
+    # 1. Sharp Path (Start at 0,0,0)
+    add(SharpPath(pos=(0, 0, 0)))
+
+    # 2. Smooth Path (Offset by 40 in X)
+    add(SmoothPath(pos=(100, 0, 0)))
+
+    # 3. Custom 2x2 Path (Offset in Z by 40)
+    add(CustomPath(pos=(0, 0, 0)))
+
+    # 4. Normal Path (Offset in X by 40 and Z by 40)
+    add(NormalPath(pos=(0, 0, 0)))
+
+# Export the master module
+full_scene = AllPaths()
+export(full_scene)

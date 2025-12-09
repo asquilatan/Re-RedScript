@@ -16,6 +16,7 @@ Re-RedScript (RRS) is a domain-specific language for designing Minecraft redston
 10. [Assertions](#assertions)
 11. [Simulation](#simulation)
 12. [Operators](#operators)
+13. [Standard Library](standard-library.md)
 
 ---
 

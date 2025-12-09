@@ -7,7 +7,7 @@ from .ast import (
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt,
     ImportStmt, FromImportStmt, MethodCall, GetAttr, ExprStmt,
     AssertStmt, SimulateStmt, TriggerBlock, IfStmt, WhileLoop, IndexExpr, IndexAssignment,
-    UnaryOp
+    UnaryOp, DictExpr
 )
 
 GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "rrs.lark")
@@ -118,12 +118,16 @@ class RRSTransformer(Transformer):
         return ImportStmt(module_name=module_name, alias=alias)
 
     def from_import_stmt(self, items):
-        # "from" CNAME "import" CNAME (_COMMA CNAME)* _NEWLINE
-        # items: [CNAME, CNAME, CNAME...]
+        # "from" CNAME "import" (CNAME (_COMMA CNAME)* | STAR) _NEWLINE
+        # items: [CNAME, CNAME/STAR, ...]
         module_name = str(items[0])
         names = []
         for item in items[1:]:
-            names.append(str(item))
+            s = str(item)
+            if s == '*':
+                names.append('*')
+            else:
+                names.append(s)
         return FromImportStmt(module_name=module_name, names=names)
 
     def return_stmt(self, items):
@@ -274,6 +278,16 @@ class RRSTransformer(Transformer):
         # Filter out None which might come from empty optional match
         elements = [i for i in items if i is not None]
         return ListExpr(elements=elements)
+
+    def dict_expr(self, items):
+        # items: [key_value, key_value, ...]
+        # Filter None
+        pairs = [i for i in items if i is not None]
+        return DictExpr(pairs=pairs)
+
+    def key_value(self, items):
+        # expression _COLON expression
+        return (items[0], items[1])
 
     def method_call(self, items):
         # atom "." CNAME _LPAR [arguments] _RPAR

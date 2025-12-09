@@ -6,16 +6,27 @@ from rrs.dsl.ast import (
     Program, ModuleDef, FunctionCall, Literal, Variable, BinaryOp, TupleExpr,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt, ImportStmt, FromImportStmt,
     MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt, SimulateStmt, TriggerBlock,
-    IfStmt, WhileLoop, IndexExpr, IndexAssignment, UnaryOp
+    IfStmt, WhileLoop, IndexExpr, IndexAssignment, UnaryOp, DictExpr
 )
 from typing import Dict, Any, List, Optional
 import sys
 
 class ModuleNamespace:
-    """Simple wrapper exposing interpreter globals as module-like attributes."""
+    """Simple wrapper exposing interpreter globals as module-like attributes.
+       Also used for wrapping internal Python objects (like StdLib) to look like modules.
+    """
+    def __init__(self, globals_dict):
+        self._globals = globals_dict
 
-    def __init__(self, symbols):
-        self.__dict__.update(symbols)
+    def __getattr__(self, name):
+        # Support dict access or attribute access
+        if isinstance(self._globals, dict):
+            if name in self._globals:
+                return self._globals[name]
+        elif hasattr(self._globals, name):
+             return getattr(self._globals, name)
+             
+        raise AttributeError(f"Module has no attribute '{name}'")
 
 
 class UserFunction:
@@ -60,19 +71,20 @@ class SymbolTable:
 class Interpreter:
     """Executes RRS AST nodes by walking them with a visitor."""
 
-    def __init__(self, import_cache=None, import_stack=None):
+    def __init__(self, import_cache=None, import_stack=None, base_dir=None):
         self.globals = SymbolTable()
-        self.register_builtins()
         self.current_module: Optional[Module] = None 
         self.modules_registry = {} 
         self.current_scope = self.globals
         self.import_cache = import_cache if import_cache is not None else {}
         self.import_stack = import_stack if import_stack is not None else []
+        self.base_dir = base_dir if base_dir is not None else os.getcwd() # Default to CWD if not specified
         self._module_counter = 0
         self.exports: List[Module] = []  # Modules marked for export
         self._auto_add = True  # Whether to auto-add blocks to current module
         # Active SimulationEngine when executing within a Simulate() block
         self._current_simulation = None
+        self.register_builtins()
 
     def register_builtins(self):
         import math
@@ -139,8 +151,19 @@ class Interpreter:
 
         # Simulation helpers
         self.globals.set("Simulate", self.func_Simulate)
-        self.globals.set("Trigger", self.func_Trigger)
         self.globals.set("ChangeState", self.func_ChangeState)
+
+        # Standard Library Injection
+        # We assume 'std' module is available. We inject it into the import cache directly.
+        from rrs.stdlib import StdLib
+        stdlib = StdLib(self)
+        
+        # Inject 'std' into cached modules so 'import std' finds it
+        # We wrap it in a ModuleNamespace-like object or just use the object if getattr works
+        # Current ModuleNamespace expects a dict, let's update it or wrap stdlib.
+        # Check if ModuleNamespace supports objects? No, it expects dict.
+        # I updated ModuleNamespace above to support objects.
+        self.import_cache['std'] = ModuleNamespace(stdlib)
 
         # Auto-generated registrations
         self.globals.set("Block", rrs.Block)
@@ -466,6 +489,9 @@ class Interpreter:
 
     def visit_ModuleDef(self, node: ModuleDef):
         self.modules_registry[node.name] = node
+        # Register in current scope as a callable factory
+        factory = ModuleFactory(node, self)
+        self.current_scope.set(node.name, factory)
 
     def visit_ExprStmt(self, node: ExprStmt):
         # Expression statements auto-add blocks/modules
@@ -581,17 +607,49 @@ class Interpreter:
             self.import_cache[module_name] = module_exports
 
         for name in node.names:
-            if hasattr(module_exports, name):
-                val = getattr(module_exports, name)
-                self.current_scope.set(name, val)
+            if name == '*':
+                # Import all public names
+                if hasattr(module_exports, '_globals'): # ModuleNamespace
+                    # For ModuleNamespace/virtual modules
+                     source = module_exports._globals
+                     if isinstance(source, dict):
+                         iterator = source.keys()
+                     else:
+                         iterator = dir(source)
+                     
+                     for key in iterator:
+                         if not key.startswith('_'):
+                             val = getattr(module_exports, key)
+                             self.current_scope.set(key, val)
+                else:
+                    # For compiled RRS modules (Module object or dict?)
+                    # If it's a Module/ModuleNamespace
+                    # We might need to handle different types.
+                    # Assuming it behaves like an object or dict context.
+                     iterator = dir(module_exports)
+                     for key in iterator:
+                         if not key.startswith('_'):
+                             val = getattr(module_exports, key)
+                             self.current_scope.set(key, val)
             else:
-                raise ImportError(f"cannot import name '{name}' from '{module_name}'")
+                if hasattr(module_exports, name):
+                    val = getattr(module_exports, name)
+                    self.current_scope.set(name, val)
+                else:
+                    raise ImportError(f"Module '{module_name}' has no attribute '{name}'")
 
     def load_module(self, module_name):
         # Lazy import to avoid circular dependency
         from rrs.dsl.parser import RRSParser
 
-        filename = f"{module_name}.rrs"
+        filename = os.path.join(self.base_dir, f"{module_name}.rrs")
+        
+        # Also check current working directory as fallback if relative lookup fails
+        if not os.path.exists(filename):
+             cwd_filename = f"{module_name}.rrs"
+             if os.path.exists(cwd_filename):
+                 filename = cwd_filename
+
         if module_name in self.import_stack:
             chain = " -> ".join(self.import_stack + [module_name])
             raise ImportError(f"Circular import detected: {chain}")
@@ -602,7 +660,9 @@ class Interpreter:
         self.import_stack.append(module_name)
         try:
             program = parser.parse_file(filename)
-            nested = Interpreter(import_cache=self.import_cache, import_stack=self.import_stack)
+            # Create nested interpreter with updated base_dir (directory of the imported module)
+            nested_base_dir = os.path.dirname(os.path.abspath(filename))
+            nested = Interpreter(import_cache=self.import_cache, import_stack=self.import_stack, base_dir=nested_base_dir)
             nested.run(program)
 
             # Merge globals and user-defined modules into exports
@@ -666,14 +726,34 @@ class Interpreter:
     def execute_module(self, name: str, args: List[Any], kwargs: Dict[str, Any]) -> Module:
         def_node = self.modules_registry[name]
 
-        if len(args) != len(def_node.params):
-             raise ValueError(f"Module {name} expects {len(def_node.params)} args, got {len(args)}")
-
+        if len(args) > len(def_node.params):
+             raise ValueError(f"Module {name} expects at most {len(def_node.params)} args, got {len(args)}")
+        
         # Create new scope for module execution
         prev_scope = self.current_scope
-        self.current_scope = SymbolTable(parent=self.globals) # Module scope usually isolated from caller, but has access to globals
+        self.current_scope = SymbolTable(parent=self.globals)
 
-        for param, val in zip(def_node.params, args):
+        # Bind arguments
+        bound_args = {}
+        # 1. Bind positional args
+        for i, val in enumerate(args):
+            param = def_node.params[i]
+            bound_args[param] = val
+        
+        # 2. Bind keyword args
+        for param in def_node.params:
+            if param in kwargs:
+                if param in bound_args:
+                     raise ValueError(f"Module {name} got multiple values for argument '{param}'")
+                bound_args[param] = kwargs[param]
+            elif param not in bound_args:
+                 # Check if we can proceed (maybe optional?) RRS doesn't support defaults yet?
+                 # Assuming all params required for now (unless 'pos' is special?)
+                 # Actually 'pos' is usually implicit in Module constructor if NOT defined in params, 
+                 # but here it IS defined.
+                 raise ValueError(f"Module {name} missing required argument '{param}'")
+                 
+        for param, val in bound_args.items():
             self.current_scope.set(param, val)
 
         pos = kwargs.get('pos', (0,0,0))
@@ -793,6 +873,13 @@ class Interpreter:
                 return +operand
             elif expr.op == 'not':
                 return not operand
+        elif isinstance(expr, DictExpr):
+            d = {}
+            for k_expr, v_expr in expr.pairs:
+                k = self.evaluate(k_expr, scope)
+                v = self.evaluate(v_expr, scope)
+                d[k] = v
+            return d
 
         return None
 

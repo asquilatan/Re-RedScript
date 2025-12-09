@@ -1,0 +1,28 @@
+from std import Path
+
+# Define a 2x2 module factory
+module BigBlock(pos):
+    # A 2x2x2 cube acting as a "thick pixel"
+    Block("minecraft:purple_wool", pos=pos)
+    Block("minecraft:purple_wool", pos=(pos[0]+1, pos[1], pos[2]))
+    Block("minecraft:purple_wool", pos=(pos[0], pos[1]+1, pos[2]))
+    Block("minecraft:purple_wool", pos=(pos[0]+1, pos[1]+1, pos[2]))
+    
+    Block("minecraft:purple_wool", pos=(pos[0], pos[1], pos[2]+1))
+    Block("minecraft:purple_wool", pos=(pos[0]+1, pos[1], pos[2]+1))
+    Block("minecraft:purple_wool", pos=(pos[0], pos[1]+1, pos[2]+1))
+    Block("minecraft:purple_wool", pos=(pos[0]+1, pos[1]+1, pos[2]+1))
+
+module CustomPath():
+    points = [
+        (0,0,0),
+        (10,5,0),
+        (20,0,0)
+    ]
+    
+    # Use the custom module factory
+    p = Path(points, BigBlock, smooth=False)
+    add(p)
+
+cp = CustomPath()
+export(cp)

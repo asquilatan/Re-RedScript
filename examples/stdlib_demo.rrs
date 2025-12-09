@@ -1,0 +1,34 @@
+from std import *
+# Should import Line, Path, Weighted, Cuboid, Sphere, Cylinder, Bezier, etc.
+
+module StdLibDemo():
+    # 1. Line
+    l = Line((0,0,0), (10,5,0), Stone)
+    add(l)
+    
+    # 2. Path
+    points = [(0,0,5), (5,0,5), (5,0,10), (0,0,10)]
+    p = Path(points, Cobblestone, closed=True)
+    add(p)
+    
+    # 3. Weighted Blocks
+    mix = Weighted({
+        Dirt: 0.8,
+        GrassBlock: 0.2
+    })
+    c = Cuboid((10,0,10), (15,2,15), mix, fill=True)
+    add(c)
+    
+    # 4. Geometry
+    s = Sphere((20, 10, 0), 5, Glass)
+    add(s)
+    
+    cyl = Cylinder((20, 0, 0), 3, 5, OakPlanks)
+    add(cyl)
+    
+    # 5. Bezier
+    bez = Bezier((30,0,0), (30,10,0), (40,10,0), (40,0,0), RedstoneBlock)
+    add(bez)
+
+s = StdLibDemo()
+export(s)

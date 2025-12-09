@@ -55,7 +55,7 @@ aug_assignment: CNAME _PLUSEQ expression _NEWLINE
 
 // Imports
 import_stmt: "import" CNAME ["as" CNAME] _NEWLINE
-from_import_stmt: "from" CNAME "import" CNAME (_COMMA CNAME)* _NEWLINE
+from_import_stmt: "from" CNAME "import" (CNAME (_COMMA CNAME)* | STAR) _NEWLINE
 
 // Return
 return_stmt: "return" [expression] _NEWLINE
@@ -118,7 +118,11 @@ arg: expression             -> positional_arg
      | CNAME            -> var
      | "[" [expression (_COMMA expression)*] "]" -> list_expr
      | _LPAR expression _RPAR
+     | _LPAR expression _RPAR
      | _LPAR expression (_COMMA expression)+ _RPAR -> tuple
+     | "{" [key_value (_COMMA key_value)*] "}" -> dict_expr
+
+key_value: expression _COLON expression
 
 // Terminals
 %import common.CNAME
@@ -134,6 +138,7 @@ _COMMA: ","
 _COLON: ":"
 _EQUALS: "="
 _PLUSEQ: "+="
+STAR: "*"
 
 // Custom WS that does not consume newlines
 WS: /[ \t\f]+/
@@ -146,4 +151,6 @@ COMMENT: /#[^\n]*/
 // Newline includes optional trailing comment before the actual newline
 // This allows comments on same line as code and comment-only lines in blocks
 _NEWLINE: /(\r?\n[\t ]*(#[^\n]*)?)+/
+_LBRACE: "{"
+_RBRACE: "}"
 %declare _INDENT _DEDENT

@@ -1,0 +1,32 @@
+from std import Line, Path, Bezier
+
+module CustomBlock(pos):
+    # A simple module factory
+    Block("minecraft:diamond_block", pos=pos)
+    Block("minecraft:gold_block", pos=(pos[0], pos[1]+1, pos[2]))
+
+module StdLibCustom():
+    # 1. String ID
+    start = (0,0,0)
+    end = (5,0,0)
+    l1 = Line(start, end, "minecraft:obsidian")
+    add(l1)
+
+    # 2. Module Factory (Function)
+    l2 = Line((0,0,5), (5,0,5), CustomBlock)
+    add(l2)
+
+    # 3. Module Instance
+    # Create an instance to reuse
+    m = Module("MyInstance")
+    m.add(Block("minecraft:emerald_block"))
+    
+    l3 = Line((0,0,10), (5,0,10), m)
+    add(l3)
+
+    # 4. Bezier with Custom Module
+    bez = Bezier((10,0,0), (10,5,0), (15,5,0), (15,0,0), "minecraft:emerald_block")
+    add(bez)
+
+result = StdLibCustom()
+export(result)
