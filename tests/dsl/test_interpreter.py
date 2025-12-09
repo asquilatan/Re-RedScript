@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from rrs.dsl.parser import RRSParser
 from rrs.dsl.interpreter import Interpreter
 from rrs.core.module import Module
-from rrs.core.block import Piston
+
 
 def test_interpreter_simple():
     code = """
@@ -33,7 +33,7 @@ export(m)
     # Let's check rrs.core.module.Module implementation
     assert len(mod.children) == 1
     child = mod.children[0]
-    assert isinstance(child, Piston)
+    assert child.id == "minecraft:piston"
     assert child.pos == (10, 0, 0)
 
 def test_interpreter_nested():

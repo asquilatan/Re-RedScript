@@ -25,6 +25,25 @@ Standard library functions accept more than just simple Block types. You can pas
 3.  **Weighted Palettes**: `Weighted({...})`
 4.  **Module Factories**: A user-defined `module Name(pos):`. The function will call `Name(pos=...)` for each point.
 5.  **Module Instances**: An existing `Module` object. It will be cloned and repositioned.
+6.  **Custom Blocks (blocks.json)**: You can define your own block types in a `blocks.json` file in your project directory.
+
+### Defining Custom Blocks
+Create a `blocks.json` file in the same directory as your script (or the project root):
+```json
+{
+    "SuperBlock": {
+        "id": "mod:super_block",
+        "defaults": {
+            "power": 10,
+            "variant": "red"
+        }
+    }
+}
+```
+You can then use `SuperBlock` directly in your RRS scripts:
+```python
+add(SuperBlock(pos=(0,10,0)))
+```
 
 ```python
 # 1. String ID

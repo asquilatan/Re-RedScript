@@ -165,6 +165,15 @@ Block("minecraft:diamond_block", pos=(0, 0, 0))
 - `facing`: `"north"`, `"south"`, `"east"`, `"west"`, `"up"`, `"down"`.
 - `delay`: `1`, `2`, `3`, `4`.
 
+### Custom Blocks
+You can define your own blocks in a `blocks.json` file in your project root:
+```json
+{
+    "MyBlock": { "id": "mod:custom_block", "defaults": { "variant": "blue" } }
+}
+```
+Then simply use `MyBlock` in your script!
+
 ### Standard Library (New!)
 
 RRS includes a standard library of helper functions for geometry and path finding. Import them from `std`.

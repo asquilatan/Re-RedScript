@@ -29,6 +29,7 @@ class Event:
 
 @dataclass
 class SimulatedBlock:
+    id: str
     block_type: type
     properties: Dict[str, Any]
     position: Position
@@ -42,7 +43,7 @@ def _world_to_module(world: Dict[Position, "SimulatedBlock"]) -> Module:
     """
     module = Module("world")
     for pos, sblock in world.items():
-        block = sblock.block_type(pos=pos, **sblock.properties)
+        block = sblock.block_type(sblock.id, pos=pos, **sblock.properties)
         module.add(block)
     return module
 
@@ -90,7 +91,7 @@ class SimulationEngine:
                 continue
             pos: Position = block.pos  # flatten() already returns absolute positions
             props = copy.deepcopy(block.properties)
-            self.world[pos] = SimulatedBlock(block_type=type(block), properties=props, position=pos)
+            self.world[pos] = SimulatedBlock(id=block.id, block_type=type(block), properties=props, position=pos)
 
     def run(self) -> None:
         """Runs the simulation loop until ``max_ticks`` or the queue is empty.
@@ -144,7 +145,7 @@ class SimulationEngine:
         # Import lazily to avoid circular imports at module load time
         from rrs.core.behaviors import get_behavior
 
-        behavior = get_behavior(block.block_type)
+        behavior = get_behavior(block.id)
         if behavior is None:
             return
 
@@ -164,7 +165,7 @@ class SimulationEngine:
             if block is None:
                 continue
             
-            behavior = get_behavior(block.block_type)
+            behavior = get_behavior(block.id)
             if behavior:
                 behavior.on_neighbor_update(self, neighbor_pos, source_pos)
 

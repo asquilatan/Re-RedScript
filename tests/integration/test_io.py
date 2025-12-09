@@ -1,7 +1,7 @@
 import os
 import pytest
 from rrs.core.module import Module
-from rrs.core.block import Stone
+from rrs.core.block import Block
 from rrs.io.exporter import rrs_export
 from rrs.io.importer import rrs_import
 
@@ -16,8 +16,8 @@ def cleanup_file():
 def test_export_import_roundtrip(cleanup_file):
     # Create a simple structure
     m = Module("TestModule")
-    m.add(Stone(pos=(0, 0, 0)))
-    m.add(Stone(pos=(0, 1, 0)))
+    m.add(Block("minecraft:stone", pos=(0, 0, 0)))
+    m.add(Block("minecraft:stone", pos=(0, 1, 0)))
     
     # Export
     rrs_export(m, TEST_FILE, "TestRegion")

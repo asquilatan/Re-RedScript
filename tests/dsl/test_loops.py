@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from rrs.dsl.parser import RRSParser
 from rrs.dsl.interpreter import Interpreter
-from rrs.core.block import Piston
+
 
 def test_assignment():
     code = """

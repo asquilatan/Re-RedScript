@@ -1,13 +1,13 @@
 import pytest
 
-from rrs.core.block import Stone
+from rrs.core.block import Block
 from rrs.core.module import Module
 from rrs.core.simulation import SimulationEngine, SimulatedBlock
 
 
 def _make_simple_module():
     m = Module("test", pos=(0, 0, 0))
-    m.add(Stone(pos=(1, 2, 3)))
+    m.add(Block("minecraft:stone", pos=(1, 2, 3)))
     return m
 
 
@@ -20,7 +20,7 @@ def test_engine_initializes_world_from_module():
     sb = engine.get_block(pos)
     assert isinstance(sb, SimulatedBlock)
     assert sb.position == pos
-    assert sb.block_type is Stone
+    assert sb.id == "minecraft:stone"
 
 
 def test_engine_runs_scheduled_events_in_order():

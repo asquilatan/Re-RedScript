@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Dict, Tuple, TYPE_CHECKING, Type, Optional, List
 
-from rrs.core.block import Observer, Piston, StickyPiston, Lever, RedstoneWire, Repeater, RedstoneBlock, RedstoneLamp
+from rrs.core.block import Block
 from rrs.utils.coordinates import facing_offset, is_adjacent, is_quasi_neighbor, get_neighbors
 
 if TYPE_CHECKING:  # pragma: no cover - for type checkers only
@@ -18,16 +18,20 @@ Position = Tuple[int, int, int]
 BlockState = Dict[str, object]
 
 
-# Simple registry mapping block classes to their behaviours
-_BEHAVIORS: Dict[Type[object], "BlockBehavior"] = {}
+# Simple registry mapping block IDs to their behaviours
+_BEHAVIORS: Dict[str, "BlockBehavior"] = {}
 
 
-def register_behavior(block_cls: Type[object], behavior: "BlockBehavior") -> None:
-    _BEHAVIORS[block_cls] = behavior
+def register_behavior(block_id: str, behavior: "BlockBehavior") -> None:
+    _BEHAVIORS[block_id] = behavior
 
 
-def get_behavior(block_cls: Type[object]) -> Optional["BlockBehavior"]:
-    return _BEHAVIORS.get(block_cls)
+def get_behavior(block_id: str) -> Optional["BlockBehavior"]:
+    # Check if passed arg is a type/class by mistake, but we expect string ID now.
+    if not isinstance(block_id, str):
+         # If called with type, try to handle gracefully or assume caller fixed.
+         return None
+    return _BEHAVIORS.get(block_id)
 
 
 class BlockBehavior:
@@ -86,7 +90,7 @@ class RedstoneWireBehavior(BlockBehavior):
         for neighbor_pos in get_neighbors(pos):
             neighbor = sim.get_block(neighbor_pos)
             if neighbor:
-                behavior = get_behavior(neighbor.block_type)
+                behavior = get_behavior(neighbor.id)
                 if behavior:
                     power = behavior.get_power_output(sim, neighbor_pos)
                     max_power = max(max_power, power)
@@ -128,7 +132,7 @@ class RepeaterBehavior(BlockBehavior):
         input_block = sim.get_block(input_pos)
         powered = False
         if input_block:
-            behavior = get_behavior(input_block.block_type)
+            behavior = get_behavior(input_block.id)
             if behavior and behavior.get_power_output(sim, input_pos) > 0:
                 powered = True
 
@@ -218,7 +222,7 @@ class PistonBehavior(BlockBehavior):
         for neighbor_pos in get_neighbors(pos):
             neighbor = sim.get_block(neighbor_pos)
             if neighbor:
-                behavior = get_behavior(neighbor.block_type)
+                behavior = get_behavior(neighbor.id)
                 if behavior and behavior.get_power_output(sim, neighbor_pos) > 0:
                     return True
 
@@ -228,7 +232,7 @@ class PistonBehavior(BlockBehavior):
             if is_quasi_neighbor(pos, neighbor_pos):
                 neighbor = sim.get_block(neighbor_pos)
                 if neighbor:
-                    behavior = get_behavior(neighbor.block_type)
+                    behavior = get_behavior(neighbor.id)
                     if behavior and behavior.get_power_output(sim, neighbor_pos) > 0:
                         return True
 
@@ -247,7 +251,7 @@ class RedstoneLampBehavior(BlockBehavior):
         for neighbor_pos in get_neighbors(pos):
             neighbor = sim.get_block(neighbor_pos)
             if neighbor:
-                behavior = get_behavior(neighbor.block_type)
+                behavior = get_behavior(neighbor.id)
                 if behavior and behavior.get_power_output(sim, neighbor_pos) > 0:
                     powered = True
                     break
@@ -256,11 +260,12 @@ class RedstoneLampBehavior(BlockBehavior):
 
 
 # Register default behaviours
-register_behavior(Observer, ObserverBehavior())
-register_behavior(Piston, PistonBehavior())
-register_behavior(StickyPiston, PistonBehavior())  # Same behavior as regular piston for now
-register_behavior(Lever, LeverBehavior())
-register_behavior(RedstoneBlock, RedstoneBlockBehavior())
-register_behavior(RedstoneWire, RedstoneWireBehavior())
-register_behavior(Repeater, RepeaterBehavior())
-register_behavior(RedstoneLamp, RedstoneLampBehavior())
+# Register default behaviours
+register_behavior("minecraft:observer", ObserverBehavior())
+register_behavior("minecraft:piston", PistonBehavior())
+register_behavior("minecraft:sticky_piston", PistonBehavior())  # Same behavior as regular piston for now
+register_behavior("minecraft:lever", LeverBehavior())
+register_behavior("minecraft:redstone_block", RedstoneBlockBehavior())
+register_behavior("minecraft:redstone_wire", RedstoneWireBehavior())
+register_behavior("minecraft:repeater", RepeaterBehavior())
+register_behavior("minecraft:redstone_lamp", RedstoneLampBehavior())

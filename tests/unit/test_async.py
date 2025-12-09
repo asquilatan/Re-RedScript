@@ -1,14 +1,14 @@
 import pytest
 
-from rrs.core.block import Observer, Piston
+from rrs.core.block import Block
 from rrs.core.module import Module
 from rrs.core.simulation import SimulationEngine
 
 
 def _observer_piston_module():
     m = Module("obs_piston_async")
-    obs = Observer(pos=(0, 0, 0), facing="east")
-    piston = Piston(pos=(1, 0, 0), facing="east")
+    obs = Block("minecraft:observer", pos=(0, 0, 0), facing="east")
+    piston = Block("minecraft:piston", pos=(1, 0, 0), facing="east")
     m.add(obs)
     m.add(piston)
     return m, obs, piston

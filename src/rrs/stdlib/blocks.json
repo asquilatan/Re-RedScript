@@ -1,0 +1,509 @@
+{
+    "AcaciaPlanks": {
+        "id": "minecraft:acacia_planks"
+    },
+    "ActivatorRail": {
+        "id": "minecraft:activator_rail",
+        "defaults": {
+            "shape": "north_south",
+            "powered": "false"
+        }
+    },
+    "BambooPlanks": {
+        "id": "minecraft:bamboo_planks"
+    },
+    "BirchPlanks": {
+        "id": "minecraft:birch_planks"
+    },
+    "BlackConcrete": {
+        "id": "minecraft:black_concrete"
+    },
+    "BlackGlazedTerracotta": {
+        "id": "minecraft:black_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "BlackStainedGlass": {
+        "id": "minecraft:black_stained_glass"
+    },
+    "BlackTerracotta": {
+        "id": "minecraft:black_terracotta"
+    },
+    "BlueConcrete": {
+        "id": "minecraft:blue_concrete"
+    },
+    "BlueGlazedTerracotta": {
+        "id": "minecraft:blue_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "BlueStainedGlass": {
+        "id": "minecraft:blue_stained_glass"
+    },
+    "BlueTerracotta": {
+        "id": "minecraft:blue_terracotta"
+    },
+    "BrownConcrete": {
+        "id": "minecraft:brown_concrete"
+    },
+    "BrownGlazedTerracotta": {
+        "id": "minecraft:brown_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "BrownStainedGlass": {
+        "id": "minecraft:brown_stained_glass"
+    },
+    "BrownTerracotta": {
+        "id": "minecraft:brown_terracotta"
+    },
+    "CherryPlanks": {
+        "id": "minecraft:cherry_planks"
+    },
+    "Cobblestone": {
+        "id": "minecraft:cobblestone"
+    },
+    "Comparator": {
+        "id": "minecraft:comparator",
+        "defaults": {
+            "facing": "north",
+            "mode": "compare"
+        }
+    },
+    "CyanConcrete": {
+        "id": "minecraft:cyan_concrete"
+    },
+    "CyanGlazedTerracotta": {
+        "id": "minecraft:cyan_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "CyanStainedGlass": {
+        "id": "minecraft:cyan_stained_glass"
+    },
+    "CyanTerracotta": {
+        "id": "minecraft:cyan_terracotta"
+    },
+    "DarkOakPlanks": {
+        "id": "minecraft:dark_oak_planks"
+    },
+    "DaylightDetector": {
+        "id": "minecraft:daylight_detector"
+    },
+    "DetectorRail": {
+        "id": "minecraft:detector_rail",
+        "defaults": {
+            "shape": "north_south",
+            "powered": "false"
+        }
+    },
+    "DiamondBlock": {
+        "id": "minecraft:diamond_block"
+    },
+    "Dirt": {
+        "id": "minecraft:dirt"
+    },
+    "Dispenser": {
+        "id": "minecraft:dispenser",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "Dropper": {
+        "id": "minecraft:dropper",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "EmeraldBlock": {
+        "id": "minecraft:emerald_block"
+    },
+    "Glass": {
+        "id": "minecraft:glass"
+    },
+    "Glowstone": {
+        "id": "minecraft:glowstone"
+    },
+    "GoldBlock": {
+        "id": "minecraft:gold_block"
+    },
+    "GrassBlock": {
+        "id": "minecraft:grass_block"
+    },
+    "Gravel": {
+        "id": "minecraft:gravel"
+    },
+    "GrayConcrete": {
+        "id": "minecraft:gray_concrete"
+    },
+    "GrayGlazedTerracotta": {
+        "id": "minecraft:gray_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "GrayStainedGlass": {
+        "id": "minecraft:gray_stained_glass"
+    },
+    "GrayTerracotta": {
+        "id": "minecraft:gray_terracotta"
+    },
+    "GreenConcrete": {
+        "id": "minecraft:green_concrete"
+    },
+    "GreenGlazedTerracotta": {
+        "id": "minecraft:green_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "GreenStainedGlass": {
+        "id": "minecraft:green_stained_glass"
+    },
+    "GreenTerracotta": {
+        "id": "minecraft:green_terracotta"
+    },
+    "HeavyWeightedPressurePlate": {
+        "id": "minecraft:heavy_weighted_pressure_plate",
+        "defaults": {
+            "power": 0
+        }
+    },
+    "HoneyBlock": {
+        "id": "minecraft:honey_block"
+    },
+    "Hopper": {
+        "id": "minecraft:hopper",
+        "defaults": {
+            "facing": "down"
+        }
+    },
+    "IronBlock": {
+        "id": "minecraft:iron_block"
+    },
+    "JunglePlanks": {
+        "id": "minecraft:jungle_planks"
+    },
+    "LapisBlock": {
+        "id": "minecraft:lapis_block"
+    },
+    "Lectern": {
+        "id": "minecraft:lectern",
+        "defaults": {
+            "facing": "north",
+            "has_book": "false"
+        }
+    },
+    "Lever": {
+        "id": "minecraft:lever",
+        "defaults": {
+            "face": "wall",
+            "facing": "north",
+            "powered": "false"
+        }
+    },
+    "LightBlueConcrete": {
+        "id": "minecraft:light_blue_concrete"
+    },
+    "LightBlueGlazedTerracotta": {
+        "id": "minecraft:light_blue_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "LightBlueStainedGlass": {
+        "id": "minecraft:light_blue_stained_glass"
+    },
+    "LightBlueTerracotta": {
+        "id": "minecraft:light_blue_terracotta"
+    },
+    "LightGrayConcrete": {
+        "id": "minecraft:light_gray_concrete"
+    },
+    "LightGrayGlazedTerracotta": {
+        "id": "minecraft:light_gray_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "LightGrayStainedGlass": {
+        "id": "minecraft:light_gray_stained_glass"
+    },
+    "LightGrayTerracotta": {
+        "id": "minecraft:light_gray_terracotta"
+    },
+    "LightWeightedPressurePlate": {
+        "id": "minecraft:light_weighted_pressure_plate",
+        "defaults": {
+            "power": 0
+        }
+    },
+    "LightningRod": {
+        "id": "minecraft:lightning_rod",
+        "defaults": {
+            "facing": "up"
+        }
+    },
+    "LimeConcrete": {
+        "id": "minecraft:lime_concrete"
+    },
+    "LimeGlazedTerracotta": {
+        "id": "minecraft:lime_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "LimeStainedGlass": {
+        "id": "minecraft:lime_stained_glass"
+    },
+    "LimeTerracotta": {
+        "id": "minecraft:lime_terracotta"
+    },
+    "MagentaConcrete": {
+        "id": "minecraft:magenta_concrete"
+    },
+    "MagentaGlazedTerracotta": {
+        "id": "minecraft:magenta_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "MagentaStainedGlass": {
+        "id": "minecraft:magenta_stained_glass"
+    },
+    "MagentaTerracotta": {
+        "id": "minecraft:magenta_terracotta"
+    },
+    "MangrovePlanks": {
+        "id": "minecraft:mangrove_planks"
+    },
+    "NoteBlock": {
+        "id": "minecraft:note_block"
+    },
+    "OakButton": {
+        "id": "minecraft:oak_button",
+        "defaults": {
+            "facing": "north",
+            "face": "wall",
+            "powered": "false"
+        }
+    },
+    "OakPlanks": {
+        "id": "minecraft:oak_planks"
+    },
+    "OakPressurePlate": {
+        "id": "minecraft:oak_pressure_plate",
+        "defaults": {
+            "powered": "false"
+        }
+    },
+    "Observer": {
+        "id": "minecraft:observer",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "OrangeConcrete": {
+        "id": "minecraft:orange_concrete"
+    },
+    "OrangeGlazedTerracotta": {
+        "id": "minecraft:orange_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "OrangeStainedGlass": {
+        "id": "minecraft:orange_stained_glass"
+    },
+    "OrangeTerracotta": {
+        "id": "minecraft:orange_terracotta"
+    },
+    "PinkConcrete": {
+        "id": "minecraft:pink_concrete"
+    },
+    "PinkGlazedTerracotta": {
+        "id": "minecraft:pink_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "PinkStainedGlass": {
+        "id": "minecraft:pink_stained_glass"
+    },
+    "PinkTerracotta": {
+        "id": "minecraft:pink_terracotta"
+    },
+    "Piston": {
+        "id": "minecraft:piston",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "Podzol": {
+        "id": "minecraft:podzol"
+    },
+    "PoweredRail": {
+        "id": "minecraft:powered_rail",
+        "defaults": {
+            "shape": "north_south",
+            "powered": "false"
+        }
+    },
+    "PurpleConcrete": {
+        "id": "minecraft:purple_concrete"
+    },
+    "PurpleGlazedTerracotta": {
+        "id": "minecraft:purple_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "PurpleStainedGlass": {
+        "id": "minecraft:purple_stained_glass"
+    },
+    "PurpleTerracotta": {
+        "id": "minecraft:purple_terracotta"
+    },
+    "Rail": {
+        "id": "minecraft:rail",
+        "defaults": {
+            "shape": "north_south"
+        }
+    },
+    "RedConcrete": {
+        "id": "minecraft:red_concrete"
+    },
+    "RedGlazedTerracotta": {
+        "id": "minecraft:red_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "RedSand": {
+        "id": "minecraft:red_sand"
+    },
+    "RedStainedGlass": {
+        "id": "minecraft:red_stained_glass"
+    },
+    "RedTerracotta": {
+        "id": "minecraft:red_terracotta"
+    },
+    "RedstoneBlock": {
+        "id": "minecraft:redstone_block"
+    },
+    "RedstoneLamp": {
+        "id": "minecraft:redstone_lamp",
+        "defaults": {
+            "lit": "false"
+        }
+    },
+    "RedstoneTorch": {
+        "id": "minecraft:redstone_torch"
+    },
+    "RedstoneWire": {
+        "id": "minecraft:redstone_wire"
+    },
+    "Repeater": {
+        "id": "minecraft:repeater",
+        "defaults": {
+            "facing": "north",
+            "delay": 1
+        }
+    },
+    "Sand": {
+        "id": "minecraft:sand"
+    },
+    "SculkSensor": {
+        "id": "minecraft:sculk_sensor"
+    },
+    "SeaLantern": {
+        "id": "minecraft:sea_lantern"
+    },
+    "SlimeBlock": {
+        "id": "minecraft:slime_block"
+    },
+    "SprucePlanks": {
+        "id": "minecraft:spruce_planks"
+    },
+    "StickyPiston": {
+        "id": "minecraft:sticky_piston",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "Stone": {
+        "id": "minecraft:stone"
+    },
+    "StoneButton": {
+        "id": "minecraft:stone_button",
+        "defaults": {
+            "facing": "north",
+            "face": "wall",
+            "powered": "false"
+        }
+    },
+    "StonePressurePlate": {
+        "id": "minecraft:stone_pressure_plate",
+        "defaults": {
+            "powered": "false"
+        }
+    },
+    "TNT": {
+        "id": "minecraft:tnt"
+    },
+    "Target": {
+        "id": "minecraft:target"
+    },
+    "Terracotta": {
+        "id": "minecraft:terracotta"
+    },
+    "TintedGlass": {
+        "id": "minecraft:tinted_glass"
+    },
+    "TrappedChest": {
+        "id": "minecraft:trapped_chest",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "TripwireHook": {
+        "id": "minecraft:tripwire_hook",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "WhiteConcrete": {
+        "id": "minecraft:white_concrete"
+    },
+    "WhiteGlazedTerracotta": {
+        "id": "minecraft:white_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "WhiteStainedGlass": {
+        "id": "minecraft:white_stained_glass"
+    },
+    "WhiteTerracotta": {
+        "id": "minecraft:white_terracotta"
+    },
+    "YellowConcrete": {
+        "id": "minecraft:yellow_concrete"
+    },
+    "YellowGlazedTerracotta": {
+        "id": "minecraft:yellow_glazed_terracotta",
+        "defaults": {
+            "facing": "north"
+        }
+    },
+    "YellowStainedGlass": {
+        "id": "minecraft:yellow_stained_glass"
+    },
+    "YellowTerracotta": {
+        "id": "minecraft:yellow_terracotta"
+    }
+}
