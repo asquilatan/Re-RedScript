@@ -55,7 +55,7 @@ class LitematicConverter:
             for record in entries:
                 lines.append(f"    {self._render_block(record)}")
 
-        lines.extend(["", f"{module_name}()", ""])
+        lines.extend(["", f"m = {module_name}()", "export(m)", ""])
         return "\n".join(lines) + "\n"
 
     def _collect_blocks(self, schem: litemapy.Schematic) -> List[BlockRecord]:

@@ -30,7 +30,9 @@ def main():
             sys.exit(1)
     elif args.command == "convert":
         try:
-            convert_file(args.input, args.output, args.module_name)
+        # Output to same directory as input if not specified
+            output_dir = os.path.dirname(args.input) or "."
+            convert_file(args.input, args.output, args.module_name, output_dir)
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
@@ -54,8 +56,10 @@ def compile_file(input_path, output_path=None):
         return
         
     if not output_path:
+        # Output to same directory as input file
+        input_dir = os.path.dirname(input_path) or "."
         base_name = os.path.splitext(os.path.basename(input_path))[0]
-        output_path = f"{base_name}.litematic"
+        output_path = os.path.join(input_dir, f"{base_name}.litematic")
         
     print(f"Exporting {len(results)} modules...")
     
@@ -72,7 +76,11 @@ def compile_file(input_path, output_path=None):
     
     return output_path
 
-def convert_file(input_path, output_path=None, module_name=None):
+def convert_file(input_path, output_path=None, module_name=None, output_dir=None):
+    # If no output_path, use same directory as input
+    if not output_path and output_dir:
+        base_name = os.path.splitext(os.path.basename(input_path))[0]
+        output_path = os.path.join(output_dir, f"{base_name}.rrs")
     converter = LitematicConverter()
     result = converter.convert(input_path, output_path, module_name)
     print(f"Saved script to {result}")

@@ -1,0 +1,27 @@
+# tower.rrs - A parameterized watchtower
+
+module Floor(size):
+    for x in range(size):
+        for z in range(size):
+            Block("minecraft:stone_bricks", pos=(x, 0, z))
+
+module Pillar(height):
+    for y in range(height):
+        Block("minecraft:oak_log", pos=(0, y, 0), axis="y")
+
+module Watchtower(size, height):
+    # Base floor
+    Floor(size)
+    
+    # Corner pillars
+    Pillar(height, pos=(0, 1, 0))
+    Pillar(height, pos=(size-1, 1, 0))
+    Pillar(height, pos=(0, 1, size-1))
+    Pillar(height, pos=(size-1, 1, size-1))
+    
+    # Top floor
+    Floor(size, pos=(0, height+1, 0))
+
+# Build and export
+tower = Watchtower(5, 8)
+export(tower)

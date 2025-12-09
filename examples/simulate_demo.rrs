@@ -1,0 +1,17 @@
+module Circuit():
+    lever = Lever(pos=(0,0,0), powered=False)
+    piston = Piston(pos=(1,0,0), facing="up")
+    
+module Expected():
+    lever = Lever(pos=(0,0,0), powered=True)
+    piston = Piston(pos=(1,0,0), facing="up", extended=True)
+
+m = Circuit()
+e = Expected()
+
+Simulate((m, 100)):
+    ChangeState(m.lever, "powered", True)
+    assert(m, e)
+
+print("Circuit verified!")
+export(m)

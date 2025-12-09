@@ -11,14 +11,21 @@ statement: module_def
          | import_stmt
          | from_import_stmt
          | return_stmt
+         | simulate_stmt
          | instruction
          | assert_stmt
 
 // Assert
 assert_stmt: "assert" expression [_COMMA expression] _NEWLINE
 
-// Module Definition
+// Simulate with callback - uses Python-style indentation
+simulate_stmt: "Simulate" _LPAR _LPAR CNAME [_COMMA expression] _RPAR _RPAR _COLON suite
+
+// Module Definition (with optional trigger block)
 module_def: "module" CNAME _LPAR [params] _RPAR _COLON suite
+
+// Trigger block within module
+trigger_block: "trigger" _COLON suite
 
 // Function Definition
 func_def: "def" CNAME _LPAR [params] _RPAR _COLON suite

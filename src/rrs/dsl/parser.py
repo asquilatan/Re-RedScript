@@ -6,7 +6,7 @@ from .ast import (
     Literal, Variable, BinaryOp, TupleExpr, Statement,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt,
     ImportStmt, FromImportStmt, MethodCall, GetAttr, ExprStmt,
-    AssertStmt
+    AssertStmt, SimulateStmt, TriggerBlock
 )
 
 GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "rrs.lark")
@@ -129,6 +129,30 @@ class RRSTransformer(Transformer):
         if len(items) > 1:
             msg = items[1]
         return AssertStmt(test=test, msg=msg)
+
+    def simulate_stmt(self, items):
+        # "Simulate" "(" "(" CNAME ["," expression] ")" ")" ":" suite
+        # items: [CNAME, expression?, suite]
+        module_var = str(items[0])
+        ticks = None
+        body = []
+        
+        # Find ticks expression and body (suite)
+        for item in items[1:]:
+            if isinstance(item, list):  # suite is a list of statements
+                body = item
+            elif isinstance(item, Statement):
+                body.append(item)
+            elif item is not None:  # Expression (ticks)
+                ticks = item
+        
+        return SimulateStmt(module_var=module_var, ticks=ticks, body=body)
+
+    def trigger_block(self, items):
+        # "trigger" ":" suite
+        # items: [suite]
+        body = items[0] if items else []
+        return TriggerBlock(body=body)
 
     def params(self, items):
         return [str(token) for token in items]

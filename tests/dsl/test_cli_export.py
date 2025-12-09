@@ -18,9 +18,14 @@ def cleanup_files():
         os.remove(TEST_OUT)
 
 def test_cli_compile_export(cleanup_files):
-    # Create a test .rrs file
+    # Create a test .rrs file with module and export
     with open(TEST_RRS, 'w') as f:
-        f.write('Piston(pos=(0,0,0), facing="up")\n')
+        f.write('''module Test():
+    Piston(pos=(0,0,0), facing="up")
+
+m = Test()
+export(m)
+''')
         
     compile_file(TEST_RRS, TEST_OUT)
     

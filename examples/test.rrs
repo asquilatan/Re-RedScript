@@ -1,0 +1,10 @@
+# Define a simple module
+module House(width, height):
+    for x in range(width):
+        Block("minecraft:oak_planks", pos=(x, 0, 0))
+    for y in range(height):
+        Block("minecraft:oak_log", pos=(0, y, 0))
+
+# Create and export the module
+my_house = House(5, 4)
+export(my_house)
