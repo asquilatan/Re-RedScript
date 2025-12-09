@@ -6,7 +6,8 @@ from .ast import (
     Literal, Variable, BinaryOp, TupleExpr, Statement,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt,
     ImportStmt, FromImportStmt, MethodCall, GetAttr, ExprStmt,
-    AssertStmt, SimulateStmt, TriggerBlock
+    AssertStmt, SimulateStmt, TriggerBlock, IfStmt, WhileLoop, IndexExpr, IndexAssignment,
+    UnaryOp
 )
 
 GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "rrs.lark")
@@ -160,6 +161,50 @@ class RRSTransformer(Transformer):
     def suite(self, items):
         return items
 
+    def while_loop(self, items):
+        # "while" expression ":" suite
+        condition = items[0]
+        body = items[1] if len(items) > 1 else []
+        return WhileLoop(condition=condition, body=body)
+
+    def if_stmt(self, items):
+        # "if" expression ":" suite elif_clause* [else_clause]
+        condition = items[0]
+        body = items[1] if len(items) > 1 and isinstance(items[1], list) else []
+        elif_clauses = []
+        else_body = None
+        
+        for item in items[2:]:
+            if isinstance(item, tuple) and len(item) == 2:
+                elif_clauses.append(item)
+            elif isinstance(item, list):
+                else_body = item
+        
+        return IfStmt(condition=condition, body=body, elif_clauses=elif_clauses, else_body=else_body)
+
+    def elif_clause(self, items):
+        # "elif" expression ":" suite
+        condition = items[0]
+        body = items[1] if len(items) > 1 else []
+        return (condition, body)
+
+    def else_clause(self, items):
+        # "else" ":" suite
+        return items[0] if items else []
+
+    def index_expr(self, items):
+        # atom "[" expression "]"
+        obj = items[0]
+        index = items[1]
+        return IndexExpr(obj=obj, index=index)
+
+    def index_assignment(self, items):
+        # atom "[" expression "]" "=" expression
+        obj = items[0]
+        index = items[1]
+        value = items[2]
+        return IndexAssignment(obj=obj, index=index, value=value)
+
     def instruction(self, items):
         return ExprStmt(expr=items[0])
 
@@ -189,6 +234,13 @@ class RRSTransformer(Transformer):
     def keyword_arg(self, items):
         return Kwarg(name=str(items[0]), value=items[1])
 
+    # Unary operators
+    def neg(self, items):
+        return UnaryOp(op='-', operand=items[0])
+    
+    def pos(self, items):
+        return UnaryOp(op='+', operand=items[0])
+
     # Expressions
     def number(self, items):
         val = items[0]
@@ -207,7 +259,9 @@ class RRSTransformer(Transformer):
          return TupleExpr(elements=items)
          
     def list_expr(self, items):
-        return ListExpr(elements=items)
+        # Filter out None which might come from empty optional match
+        elements = [i for i in items if i is not None]
+        return ListExpr(elements=elements)
 
     def method_call(self, items):
         # atom "." CNAME _LPAR [arguments] _RPAR
@@ -248,6 +302,11 @@ class RRSTransformer(Transformer):
     def gt(self, items): return BinaryOp(left=items[0], op='>', right=items[1])
     def le(self, items): return BinaryOp(left=items[0], op='<=', right=items[1])
     def ge(self, items): return BinaryOp(left=items[0], op='>=', right=items[1])
+
+    # Boolean operators
+    def or_expr(self, items): return BinaryOp(left=items[0], op='or', right=items[1])
+    def and_expr(self, items): return BinaryOp(left=items[0], op='and', right=items[1])
+    def not_expr(self, items): return UnaryOp(op='not', operand=items[0])
 
 class RRSParser:
     def __init__(self):

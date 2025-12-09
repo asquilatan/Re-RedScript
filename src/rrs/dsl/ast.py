@@ -77,6 +77,11 @@ class AugAssignment(Statement):
     value: Expr
 
 @dataclass
+class UnaryOp(Expr):
+    op: str
+    operand: Expr
+
+@dataclass
 class ListExpr(Expr):
     elements: List[Expr]
 
@@ -134,5 +139,32 @@ class TriggerBlock(Statement):
 class AssertStmt(Statement):
     test: Expr
     msg: Optional[Expr] = None
+
+@dataclass
+class IfStmt(Statement):
+    """If/elif/else statement"""
+    condition: Expr
+    body: List[Statement]
+    elif_clauses: List[tuple]  # List of (condition, body) tuples
+    else_body: List[Statement] = None
+
+@dataclass
+class WhileLoop(Statement):
+    """While loop"""
+    condition: Expr
+    body: List[Statement]
+
+@dataclass
+class IndexExpr(Expr):
+    """List/dict indexing: arr[i]"""
+    obj: Expr
+    index: Expr
+
+@dataclass
+class IndexAssignment(Statement):
+    """Index assignment: arr[i] = value"""
+    obj: Expr
+    index: Expr
+    value: Expr
 
 ASTNode = Node

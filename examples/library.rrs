@@ -1,4 +1,0 @@
-module ImportedModule(x, y, z):
-    Piston(pos=(x, y, z), facing="down")
-
-CONSTANT_VAR = 5

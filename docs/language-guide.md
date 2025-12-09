@@ -199,7 +199,34 @@ module Example():
 
 ## Control Flow
 
+### If/Elif/Else
+
+Conditional execution of blocks.
+
+```python
+x = 10
+if x > 15:
+    print("Too high")
+elif x > 5:
+    print("Just right")
+else:
+    print("Too low")
+```
+
+### While Loops
+
+Loop while a condition is true.
+
+```python
+i = 0
+while i < 5:
+    Block("minecraft:stone", pos=(i, 0, 0))
+    i += 1
+```
+
 ### For Loops
+
+Iterate over ranges or lists.
 
 ```python
 # Range with single argument
@@ -209,20 +236,52 @@ for i in range(5):        # 0, 1, 2, 3, 4
 # Range with start and end
 for i in range(2, 6):     # 2, 3, 4, 5
     Block("minecraft:stone", pos=(i, 0, 0))
-
-# Nested loops
-for x in range(3):
-    for z in range(3):
-        Block("minecraft:stone", pos=(x, 0, z))
 ```
 
 ### Iterating Lists
 
 ```python
 materials = ["minecraft:stone", "minecraft:dirt", "minecraft:sand"]
-for i in range(3):
+for i in range(len(materials)):
     Block(materials[i], pos=(i, 0, 0))
 ```
+
+---
+
+## Lists and Math
+
+### List Operations
+
+RRS supports lists and basic operations:
+
+```python
+my_list = []
+append(my_list, "item1")
+append(my_list, "item2")
+
+val = my_list[0]    # Indexing
+my_list[1] = 5      # Assignment
+len(my_list)        # Length
+pop(my_list)        # Remove last item
+insert(my_list, 0, "first")
+```
+
+### Type Conversion
+
+Convert between types:
+- `str(val)`
+- `int(val)`
+- `float(val)`
+- `bool(val)`
+
+### Math Functions
+
+Standard math functions are available:
+- `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`
+- `sqrt`, `pow`, `exp`, `log`, `log10`
+- `floor`, `ceil`, `round`, `abs`, `min`, `max`
+- Constants: `PI`, `E`
+- Random: `random()`, `randint(min, max)`
 
 ---
 
@@ -460,6 +519,25 @@ x <= 5       # Less than or equal
 ```python
 x = 0
 x += 5       # x is now 5
+```
+
+### Logical Operators
+
+Combine boolean expressions with `and`, `or`, and `not`.
+
+```python
+if x > 0 and x < 10:
+    print("In range")
+
+if x < 0 or x > 10:
+    print("Out of range")
+
+if not (x == 0):
+    print("Non-zero")
+
+# Invert boolean values
+is_valid = True
+is_invalid = not is_valid
 ```
 
 ---

@@ -5,7 +5,8 @@ from rrs.core.block import Block
 from rrs.dsl.ast import (
     Program, ModuleDef, FunctionCall, Literal, Variable, BinaryOp, TupleExpr,
     Assignment, AugAssignment, ListExpr, ForLoop, FuncDef, ReturnStmt, ImportStmt, FromImportStmt,
-    MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt, SimulateStmt, TriggerBlock
+    MethodCall, GetAttr, ExprStmt, Arg, Kwarg, AssertStmt, SimulateStmt, TriggerBlock,
+    IfStmt, WhileLoop, IndexExpr, IndexAssignment, UnaryOp
 )
 from typing import Dict, Any, List, Optional
 import sys
@@ -90,9 +91,37 @@ class Interpreter:
         # Math functions
         self.globals.set("sin", math.sin)
         self.globals.set("cos", math.cos)
+        self.globals.set("tan", math.tan)
+        self.globals.set("asin", math.asin)
+        self.globals.set("acos", math.acos)
+        self.globals.set("atan", math.atan)
+        self.globals.set("atan2", math.atan2)
+        self.globals.set("sqrt", math.sqrt)
+        self.globals.set("pow", math.pow)
+        self.globals.set("exp", math.exp)
+        self.globals.set("log", math.log)
+        self.globals.set("log10", math.log10)
         self.globals.set("floor", lambda x: int(math.floor(x)))
+        self.globals.set("ceil", lambda x: int(math.ceil(x)))
+        self.globals.set("round", round)
         self.globals.set("abs", abs)
+        self.globals.set("min", min)
+        self.globals.set("max", max)
         self.globals.set("PI", math.pi)
+        self.globals.set("E", math.e)
+        
+        # List functions
+        self.globals.set("len", len)
+        self.globals.set("list", list)
+        self.globals.set("append", lambda lst, item: lst.append(item) or lst)
+        self.globals.set("pop", lambda lst: lst.pop())
+        self.globals.set("insert", lambda lst, i, item: lst.insert(i, item) or lst)
+        
+        # Type conversion
+        self.globals.set("str", str)
+        self.globals.set("int", int)
+        self.globals.set("float", float)
+        self.globals.set("bool", bool)
         
         # Random functions
         self.globals.set("random", random.random)
@@ -484,6 +513,35 @@ class Interpreter:
             for stmt in node.body:
                 self.visit(stmt)
 
+    def visit_WhileLoop(self, node: WhileLoop):
+        while self.evaluate(node.condition):
+            for stmt in node.body:
+                self.visit(stmt)
+
+    def visit_IfStmt(self, node: IfStmt):
+        if self.evaluate(node.condition):
+            for stmt in node.body:
+                self.visit(stmt)
+            return
+        
+        # Check elif clauses
+        for elif_cond, elif_body in node.elif_clauses:
+            if self.evaluate(elif_cond):
+                for stmt in elif_body:
+                    self.visit(stmt)
+                return
+        
+        # Else clause
+        if node.else_body:
+            for stmt in node.else_body:
+                self.visit(stmt)
+
+    def visit_IndexAssignment(self, node: IndexAssignment):
+        obj = self.evaluate(node.obj)
+        index = self.evaluate(node.index)
+        value = self.evaluate(node.value)
+        obj[index] = value
+
     def visit_FuncDef(self, node: FuncDef):
         self.current_scope.set(node.name, UserFunction(node, self.current_scope))
 
@@ -696,7 +754,11 @@ class Interpreter:
             if expr.op == '<': return l < r
             if expr.op == '>': return l > r
             if expr.op == '<=': return l <= r
+            if expr.op == '<=': return l <= r
             if expr.op == '>=': return l >= r
+            # Boolean operators
+            if expr.op == 'and': return l and r
+            if expr.op == 'or': return l or r
         elif isinstance(expr, TupleExpr):
             return tuple(self.evaluate(e, scope) for e in expr.elements)
         elif isinstance(expr, ListExpr):
@@ -708,6 +770,18 @@ class Interpreter:
             return self.visit_MethodCall(expr)
         elif isinstance(expr, GetAttr):
             return self.visit_GetAttr(expr)
+        elif isinstance(expr, IndexExpr):
+            obj = self.evaluate(expr.obj, scope)
+            index = self.evaluate(expr.index, scope)
+            return obj[index]
+        elif isinstance(expr, UnaryOp):
+            operand = self.evaluate(expr.operand, scope)
+            if expr.op == '-':
+                return -operand
+            elif expr.op == '+':
+                return +operand
+            elif expr.op == 'not':
+                return not operand
 
         return None
 

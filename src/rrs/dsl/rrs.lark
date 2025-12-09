@@ -6,6 +6,8 @@ start: (statement | _NEWLINE)+
 statement: module_def
          | func_def
          | for_loop
+         | while_loop
+         | if_stmt
          | assignment
          | aug_assignment
          | import_stmt
@@ -33,8 +35,17 @@ func_def: "def" CNAME _LPAR [params] _RPAR _COLON suite
 // For Loop
 for_loop: "for" CNAME "in" expression _COLON suite
 
+// While Loop
+while_loop: "while" expression _COLON suite
+
+// If/Elif/Else
+if_stmt: "if" expression _COLON suite elif_clause* [else_clause]
+elif_clause: "elif" expression _COLON suite
+else_clause: "else" _COLON suite
+
 // Assignment
 assignment: CNAME _EQUALS expression _NEWLINE
+           | atom _LSQB expression _RSQB _EQUALS expression _NEWLINE -> index_assignment
 aug_assignment: CNAME _PLUSEQ expression _NEWLINE
 
 // Imports
@@ -60,7 +71,17 @@ arg: expression             -> positional_arg
    | CNAME _EQUALS expression   -> keyword_arg
 
 // Expressions
-?expression: comparison
+?expression: or_test
+
+?or_test: and_test
+        | or_test "or" and_test -> or_expr
+
+?and_test: not_test
+         | and_test "and" not_test -> and_expr
+
+?not_test: comparison
+         | "not" not_test -> not_expr
+         | comparison
 
 ?comparison: sum
            | sum "==" sum -> eq
@@ -74,13 +95,18 @@ arg: expression             -> positional_arg
     | sum "+" product   -> add
     | sum "-" product   -> sub
 
-?product: atom
-        | product "*" atom  -> mul
-        | product "/" atom  -> div
+?product: unary
+        | product "*" unary  -> mul
+        | product "/" unary  -> div
+
+?unary: atom
+      | "-" unary -> neg
+      | "+" unary -> pos
 
 ?atom: NUMBER           -> number
      | ESCAPED_STRING   -> string
      | function_call
+     | atom _LSQB expression _RSQB -> index_expr
      | atom "." CNAME _LPAR [arguments] _RPAR -> method_call
      | atom "." CNAME   -> getattr
      | CNAME            -> var

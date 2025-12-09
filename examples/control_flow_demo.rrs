@@ -1,0 +1,45 @@
+module Demo():
+    # Test Lists and Append
+    my_list = []
+    append(my_list, 1)
+    append(my_list, 2)
+    append(my_list, 3)
+    
+    print("List content:")
+    print(my_list)
+    
+    # Test Indexing
+    first = my_list[0]
+    print("First element: " + str(first))
+    
+    # Test Index Assignment
+    my_list[1] = 5
+    print("Modified list:")
+    print(my_list)
+    
+    # Test While Loop
+    i = 0
+    while i < len(my_list):
+        val = my_list[i]
+        Block("minecraft:stone", pos=(val, 0, 0))
+        i += 1
+        
+    # Test If/Elif/Else
+    x = 10
+    if x < 5:
+        print("x is small")
+    elif x > 5:
+        print("x is big")
+        Block("minecraft:diamond_block", pos=(0, 1, 0))
+    else:
+        print("x is 5")
+
+    # Test Math
+    val = sqrt(16)
+    print("Square root of 16 is: " + str(val))
+    
+    val2 = pow(2, 3)
+    print("2 to power of 3 is: " + str(val2))
+
+m = Demo()
+export(m)
