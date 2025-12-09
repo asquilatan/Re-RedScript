@@ -11,7 +11,7 @@ Re-RedScript (RRS) is a declarative DSL designed specifically for creating, test
 
 ## Philosophy
 
-### 🧱 Modularity First
+### Modularity First
 
 RRS is built around the concept of **modules**: reusable, parameterized building blocks that can be composed into complex contraptions. Instead of placing blocks one-by-one, you define modules once and instantiate them anywhere.
 
@@ -27,7 +27,7 @@ Pillar(4, 0, 0, 8)
 Pillar(8, 0, 0, 3)
 ```
 
-### 🧪 Assertion-Driven Testing
+### Assertion-Driven Testing
 
 RRS was specifically designed with testing in mind. The `assert()` function allows you to verify that contraptions match expected structures.
 
@@ -116,6 +116,30 @@ rrs compile door.rrs
 
 # Custom output path
 rrs compile door.rrs -o builds/3x3_door.litematic
+```
+
+### Convert Command
+
+```bash
+rrs convert <schematic.litematic> [-o output.rrs] [--module-name MODULE_NAME]
+```
+
+| Option | Description |
+|--------|-------------|
+| `<schematic.litematic>` | Input Litematic file |
+| `-o, --output` | Output RRS file path (default: `<input>.rrs`) |
+| `--module-name` | Override the generated module name |
+
+**Examples:**
+```bash
+# Basic convert
+rrs convert my_build.litematic
+
+# Custom output
+rrs convert my_build.litematic -o reversed.rrs
+
+# Custom module name
+rrs convert component.litematic --module-name MyComponent
 ```
 
 ---
