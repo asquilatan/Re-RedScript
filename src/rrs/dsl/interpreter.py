@@ -165,6 +165,15 @@ class Interpreter:
         # I updated ModuleNamespace above to support objects.
         self.import_cache['std'] = ModuleNamespace(stdlib)
 
+        # Inject new modules: std.line, std.figure, std.img
+        import rrs.stdlib.line as std_line
+        import rrs.stdlib.figure as std_figure
+        import rrs.stdlib.img as std_img
+
+        self.import_cache['std.line'] = ModuleNamespace(std_line)
+        self.import_cache['std.figure'] = ModuleNamespace(std_figure)
+        self.import_cache['std.img'] = ModuleNamespace(std_img)
+
         # Auto-generated registrations
         self.globals.set("Block", Block)
         
