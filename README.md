@@ -37,9 +37,6 @@ assert(my_build, reference_build)
 
 # Check only specific properties matter
 assert(my_build, reference_build, "facing")
-
-# Compare structure regardless of position (custom logic or flags if supported)
-# Note: See docs for specific assertion flags
 ```
 
 ---
@@ -96,6 +93,60 @@ This creates `my_contraption.litematic` in the same directory.
 
 ---
 
+## Standard Library
+
+RRS includes a standard library of helper functions for geometry, image processing, and path finding.
+
+### Geometry
+
+The geometry library is split into 2D and 3D modules.
+
+**2D Geometry (`std.geom2d`)**
+
+```python
+from std.geom2d import Line, Path, Bezier
+
+# Draw a line
+l = Line((0,0,0), (10,5,0), Stone)
+add(l)
+
+# Draw a curved path
+p = Path(points, "minecraft:gold_block", smooth=True)
+add(p)
+```
+
+**3D Geometry (`std.geom3d`)**
+
+```python
+from std.geom3d import Cuboid, Sphere, Cylinder
+
+# Draw a solid box
+c = Cuboid((0,0,0), (5,5,5), "minecraft:dirt", fill=True)
+add(c)
+```
+
+**Legacy `std` Module**
+*Note: The `std` module is deprecated. Please migrate to `std.geom2d` and `std.geom3d`.*
+
+### Image Processing (`std.img` or `Img`)
+
+You can convert images into Minecraft blocks.
+
+```python
+from Img import ConvertPicture, ConvertHeightmap
+
+# Convert PNG to block art (flat)
+# path, length (x), width (z), height (y)
+m = ConvertPicture("path/to/img.png", length=10, width=10, height=1)
+add(m)
+
+# Convert PNG to 3D terrain heightmap
+m2 = ConvertHeightmap("path/to/heightmap.png", length=20, width=20, max_height=15)
+add(m2)
+```
+
+---
+
 ## CLI Reference
 
 ### Compile Command
@@ -104,42 +155,10 @@ This creates `my_contraption.litematic` in the same directory.
 rrs compile <file.rrs> [-o output.litematic]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `<file.rrs>` | Input RRS script file |
-| `-o, --output` | Output file path (default: `<input>.litematic`) |
-
-**Examples:**
-```bash
-# Basic compile
-rrs compile door.rrs
-
-# Custom output path
-rrs compile door.rrs -o builds/3x3_door.litematic
-```
-
 ### Convert Command
 
 ```bash
 rrs convert <schematic.litematic> [-o output.rrs] [--module-name MODULE_NAME]
-```
-
-| Option | Description |
-|--------|-------------|
-| `<schematic.litematic>` | Input Litematic file |
-| `-o, --output` | Output RRS file path (default: `<input>.rrs`) |
-| `--module-name` | Override the generated module name |
-
-**Examples:**
-```bash
-# Basic convert
-rrs convert my_build.litematic
-
-# Custom output
-rrs convert my_build.litematic -o reversed.rrs
-
-# Custom module name
-rrs convert component.litematic --module-name MyComponent
 ```
 
 ---
@@ -158,50 +177,6 @@ Repeater(pos=(2, 0, 0), facing="north", delay=2)
 
 # Generic syntax
 Block("minecraft:diamond_block", pos=(0, 0, 0))
-```
-
-**Common Properties:**
-- `pos`: `(x, y, z)` tuple.
-- `facing`: `"north"`, `"south"`, `"east"`, `"west"`, `"up"`, `"down"`.
-- `delay`: `1`, `2`, `3`, `4`.
-
-### Custom Blocks
-You can define your own blocks in a `blocks.json` file in your project root:
-```json
-{
-    "MyBlock": { "id": "mod:custom_block", "defaults": { "variant": "blue" } }
-}
-```
-Then simply use `MyBlock` in your script!
-
-### Standard Library (New!)
-
-RRS includes a standard library of helper functions for geometry and path finding. Import them from `std`.
-
-```python
-from std import Line, Bezier, Weighted, Cuboid
-
-module MyBuild():
-    # Draw a line
-    l = Line((0,0,0), (10,5,0), Stone)
-    add(l)
-
-    # Draw a curved path
-    # Weighted Randomization with Dictionary Syntax
-    palette = Weighted({
-        Dirt: 0.8,
-        GrassBlock: 0.2
-    })
-    c = Cuboid((0,0,0), (5,5,5), palette, fill=True)
-    add(c)
-
-    m = Module("MyPart")
-    m.add(Block("minecraft:glass"))
-    Line(start, end, m)
-
-    # Paths can now be smooth (Catmull-Rom spline)
-    p = Path(points, "minecraft:gold_block", smooth=True)
-    add(p)
 ```
 
 ### Variables
@@ -295,4 +270,3 @@ Simulate((m, 100)):
 ## License
 
 MIT License - See LICENSE file for details.
-

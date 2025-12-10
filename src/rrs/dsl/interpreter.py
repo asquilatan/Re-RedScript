@@ -155,15 +155,20 @@ class Interpreter:
 
         # Standard Library Injection
         # We assume 'std' module is available. We inject it into the import cache directly.
-        from rrs.stdlib import StdLib
+        from rrs.stdlib.std import StdLib
         stdlib = StdLib(self)
-        
-        # Inject 'std' into cached modules so 'import std' finds it
-        # We wrap it in a ModuleNamespace-like object or just use the object if getattr works
-        # Current ModuleNamespace expects a dict, let's update it or wrap stdlib.
-        # Check if ModuleNamespace supports objects? No, it expects dict.
-        # I updated ModuleNamespace above to support objects.
         self.import_cache['std'] = ModuleNamespace(stdlib)
+
+        from rrs.stdlib.geom2d import Geom2D
+        self.import_cache['std.geom2d'] = ModuleNamespace(Geom2D(self))
+
+        from rrs.stdlib.geom3d import Geom3D
+        self.import_cache['std.geom3d'] = ModuleNamespace(Geom3D(self))
+
+        from rrs.stdlib.img import ImgLib
+        img_lib = ModuleNamespace(ImgLib(self))
+        self.import_cache['std.img'] = img_lib
+        self.import_cache['Img'] = img_lib # For "from Img import ..."
 
         # Auto-generated registrations
         self.globals.set("Block", Block)
