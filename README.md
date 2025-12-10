@@ -68,9 +68,9 @@ Create a file called `my_contraption.rrs`:
 # Define a simple component
 module TFlipFlop(x, y, z):
     Piston(pos=(x, y, z), facing="up")
-    RedstoneBlock(pos=(x, y + 1, z))
-    Observer(pos=(x + 1, y, z), facing="west")
-    Repeater(pos=(x + 2, y, z), facing="west", delay=1)
+    Stone(pos=(x, y + 1, z))
+    Observer(pos=(x + 1, y, z), facing="east")
+    Noteblock(pos=(x + 2, y, z))
 
 # Instantiate it
 TFlipFlop(0, 0, 0)
