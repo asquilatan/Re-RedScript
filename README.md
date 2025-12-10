@@ -37,9 +37,6 @@ assert(my_build, reference_build)
 
 # Check only specific properties matter
 assert(my_build, reference_build, "facing")
-
-# Compare structure regardless of position (custom logic or flags if supported)
-# Note: See docs for specific assertion flags
 ```
 
 ---
@@ -51,14 +48,13 @@ assert(my_build, reference_build, "facing")
 git clone https://github.com/asquilatan/Re-RedScript.git
 cd re-redscript
 
-# Install in development mode
+# Install dependencies
+pip install -r requirements.txt
 pip install -e .
 
 # Verify installation
 rrs --help
 ```
-
-After installation, the `rrs` command is available globally.
 
 ---
 
@@ -88,11 +84,74 @@ rrs compile my_contraption.rrs
 
 This creates `my_contraption.litematic` in the same directory.
 
-### 3. Load in Minecraft
+---
 
-1. Install the [Litematica](https://www.curseforge.com/minecraft/mc-mods/litematica) mod.
-2. Copy the `.litematic` file to `.minecraft/schematics/`.
-3. Use Litematica to load and paste the schematic.
+## Standard Library
+
+RRS includes a robust standard library for geometry and image processing.
+
+### Import Syntax
+
+```python
+import std.line as line
+import std.figure as fig
+import std.img as img
+```
+
+### Geometry (`std.line`)
+
+Functions for drawing lines and paths.
+
+```python
+# Draw a Line
+l = line.Line((0,0,0), (10,5,0), Stone)
+add(l)
+
+# Draw a Bezier curve
+b = line.Bezier((0,0,0), (5,10,0), (15,10,0), (20,0,0), GoldBlock)
+add(b)
+
+# Draw a Path (optionally smooth)
+p = line.Path([(0,0,0), (5,0,5), (10,0,0)], DiamondBlock, smooth=True)
+add(p)
+```
+
+### Shapes (`std.figure`)
+
+Functions for solid shapes.
+
+```python
+# Draw a hollow Sphere
+s = fig.Sphere((0,10,0), 5, Glass)
+add(s)
+
+# Draw a filled Cuboid
+c = fig.Cuboid((0,0,0), (5,5,5), Stone, fill=True)
+add(c)
+```
+
+### Image Processing (`std.img`)
+
+Convert images into Minecraft blocks. RRS automatically maps pixels to a colorful palette of blocks.
+
+```python
+# Basic import (horizontal, flat)
+m = img.ConvertPicture("logo.png")
+add(m)
+
+# Vertical billboard
+m2 = img.ConvertPicture("logo.png", vertical=True)
+add(m2)
+
+# Resizing
+m3 = img.ConvertPicture("logo.png", length=50, width=50)
+add(m3)
+
+# 3D Heightmap Generation
+# Uses pixel brightness to determine height
+terrain = img.ConvertPicture("heightmap.png", height=20, heightmap=True)
+add(terrain)
+```
 
 ---
 
@@ -104,42 +163,10 @@ This creates `my_contraption.litematic` in the same directory.
 rrs compile <file.rrs> [-o output.litematic]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `<file.rrs>` | Input RRS script file |
-| `-o, --output` | Output file path (default: `<input>.litematic`) |
-
-**Examples:**
-```bash
-# Basic compile
-rrs compile door.rrs
-
-# Custom output path
-rrs compile door.rrs -o builds/3x3_door.litematic
-```
-
 ### Convert Command
 
 ```bash
 rrs convert <schematic.litematic> [-o output.rrs] [--module-name MODULE_NAME]
-```
-
-| Option | Description |
-|--------|-------------|
-| `<schematic.litematic>` | Input Litematic file |
-| `-o, --output` | Output RRS file path (default: `<input>.rrs`) |
-| `--module-name` | Override the generated module name |
-
-**Examples:**
-```bash
-# Basic convert
-rrs convert my_build.litematic
-
-# Custom output
-rrs convert my_build.litematic -o reversed.rrs
-
-# Custom module name
-rrs convert component.litematic --module-name MyComponent
 ```
 
 ---
@@ -154,118 +181,32 @@ RRS provides shorthand classes for common Minecraft blocks and a generic `Block`
 # Shorthand syntax
 Stone(pos=(0, 0, 0))
 Piston(pos=(1, 0, 0), facing="up")
-Repeater(pos=(2, 0, 0), facing="north", delay=2)
 
 # Generic syntax
 Block("minecraft:diamond_block", pos=(0, 0, 0))
 ```
 
-**Common Properties:**
-- `pos`: `(x, y, z)` tuple.
-- `facing`: `"north"`, `"south"`, `"east"`, `"west"`, `"up"`, `"down"`.
-- `delay`: `1`, `2`, `3`, `4`.
-
 ### Custom Blocks
-You can define your own blocks in a `blocks.json` file in your project root:
-```json
-{
-    "MyBlock": { "id": "mod:custom_block", "defaults": { "variant": "blue" } }
-}
-```
-Then simply use `MyBlock` in your script!
-
-### Standard Library (New!)
-
-RRS includes a standard library of helper functions for geometry and path finding. Import them from `std`.
-
-```python
-from std import Line, Bezier, Weighted, Cuboid
-
-module MyBuild():
-    # Draw a line
-    l = Line((0,0,0), (10,5,0), Stone)
-    add(l)
-
-    # Draw a curved path
-    # Weighted Randomization with Dictionary Syntax
-    palette = Weighted({
-        Dirt: 0.8,
-        GrassBlock: 0.2
-    })
-    c = Cuboid((0,0,0), (5,5,5), palette, fill=True)
-    add(c)
-
-    m = Module("MyPart")
-    m.add(Block("minecraft:glass"))
-    Line(start, end, m)
-
-    # Paths can now be smooth (Catmull-Rom spline)
-    p = Path(points, "minecraft:gold_block", smooth=True)
-    add(p)
-```
+You can define your own blocks in a `blocks.json` file in your project root.
 
 ### Variables
 
 Variables can store values or blocks. Note that assigning a block to a variable does **not** automatically add it to the module; you must use `add()`.
 
 ```python
-height = 5
-width = 10
-
-# Block assignment (not added yet)
 b = Block("minecraft:stone", pos=(0, 0, 0))
 add(b) # Explicitly add
-```
-
-### Modules
-
-Modules group blocks together.
-
-```python
-module Bridge(length):
-    for x in range(length):
-        Block("minecraft:oak_planks", pos=(x, 0, 0))
-
-# Instantiate
-Bridge(10)
 ```
 
 ### Control Flow
 
 RRS supports `if`, `elif`, `else`, `while`, and `for` loops.
 
-```python
-for i in range(5):
-    Stone(pos=(i, 0, 0))
-
-if height > 10:
-    print("Tall structure")
-
-# Single-line conditionals are also supported
-if height < 5: print("Short structure")
- else: print("Average structure")
-```
-
-### Imports
-
-Import modules from other `.rrs` files.
-
-```python
-import library
-# Use: library.MyModule()
-
-from library import MyModule
-# Use: MyModule()
-```
-
 ### Built-in Functions
 
-- `range(n)`, `range(start, end)`
-- `print(value)`
-- `len(list)`, `append(list, item)`, `pop(list)`, `insert(list, index, item)`
-- `str()`, `int()`, `float()`, `bool()`
-- Math: `sin`, `cos`, `sqrt`, `pow`, `floor`, `ceil`, `round`, `abs`, `min`, `max`, `random`, `randint`
-- Constants: `PI`, `E`
+- Math: `sin`, `cos`, `sqrt`, `random`, etc.
+- Lists: `len`, `append`, `pop`, `insert`
+- `range`, `print`, `assert`
 
 ---
 
@@ -295,4 +236,3 @@ Simulate((m, 100)):
 ## License
 
 MIT License - See LICENSE file for details.
-
