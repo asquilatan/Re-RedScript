@@ -70,7 +70,7 @@ module TFlipFlop(x, y, z):
     Piston(pos=(x, y, z), facing="up")
     Stone(pos=(x, y + 1, z))
     Observer(pos=(x + 1, y, z), facing="east")
-    Noteblock(pos=(x + 2, y, z))
+    NoteBlock(pos=(x + 2, y, z))
 
 # Instantiate it
 TFlipFlop(0, 0, 0)
