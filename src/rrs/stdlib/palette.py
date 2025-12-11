@@ -136,11 +136,13 @@ BLOCK_PALETTE = {
 }
 
 from typing import Tuple
+import functools
 
 # Pre-process palette for faster lookup
 # Convert keys to simple names if needed, but we used IDs.
 PALETTE_LIST = [(color, block_id) for block_id, color in BLOCK_PALETTE.items()]
 
+@functools.lru_cache(maxsize=1024)
 def find_closest_block(rgb: Tuple[int, int, int]) -> str:
     """Finds the closest block ID for a given RGB color using Euclidean distance."""
     # This could be optimized (e.g., KD-Tree), but linear scan is fine for <1000 items and reasonable image sizes.
