@@ -1,8 +1,9 @@
 from typing import Optional, Tuple
 from PIL import Image
 from rrs.stdlib.utils import create_module, place_in_module
-from rrs.stdlib.palette import find_closest_block
+from rrs.stdlib.palette import find_closest_block, PALETTE_LIST
 import math
+import numpy as np
 
 def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int] = None, height: int = 1, vertical: bool = False, rotate: float = 0, heightmap: bool = False):
     """
@@ -64,78 +65,112 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
     if (target_w, target_h) != img.size:
         img = img.resize((target_w, target_h), Image.Resampling.NEAREST)
 
-    pixels = img.load()
-    w, h = img.size
+    # Optimization: Use Numpy for vectorized color matching
+    # Convert image to numpy array
+    img_array = np.array(img) # (h, w, 3)
 
-    # Iterate pixels
-    # Image coordinates: x (0..w-1), y (0..h-1)
+    # Prepare palette
+    palette_colors = np.array([c for c, _ in PALETTE_LIST]) # (P, 3)
+    palette_blocks = [b for _, b in PALETTE_LIST]
 
-    for px in range(w):
-        for py in range(h):
-            color = pixels[px, py]
-            block_id = find_closest_block(color)
+    # Flatten image for processing
+    h, w, _ = img_array.shape
+    pixels_flat = img_array.reshape(-1, 3) # (N, 3)
 
-            # Map image (x, y) to module (x, y, z)
-            # Default (Horizontal, flat on ground): Image X -> Module X, Image Y -> Module Z
-            # Vertical (Upright): Image X -> Module X, Image Y -> Module Y
+    # Vectorized Euclidean distance calculation
+    # (a-b)^2 = a^2 + b^2 - 2ab
+    # term1: sum(pixels^2, axis=1) -> (N,)
+    # term2: sum(palette^2, axis=1) -> (P,)
+    # term3: 2 * pixels @ palette.T -> (N, P)
 
-            ix, iy = px, py
+    pixels_float = pixels_flat.astype(float)
+    palette_float = palette_colors.astype(float)
 
-            if heightmap:
-                # Use brightness for height
-                # Brightness = (R+G+B)/3 or using luminance formula
-                # Normalize to 0..height
-                r, g, b = color
-                brightness = (r + g + b) / (3.0 * 255.0)
-                # Map 0..1 to 1..height (or 0..height-1?)
-                # Assuming height=1 means flat. height=10 means max height 10.
-                y_offset = int(brightness * (height - 1)) if height > 1 else 0
+    # Precompute terms
+    # We can precompute palette term, but since ConvertPicture is likely called once per script run, calculating here is fine.
+    # Note: If PALETTE_LIST is constant, we could cache palette_sum_sq.
+    palette_sum_sq = np.sum(palette_float**2, axis=1) # (P,)
 
-                if vertical:
-                    # Heightmap on vertical plane? "Terrain" usually implies XZ plane.
-                    # But if vertical=True, maybe it's a relief map on a wall.
-                    # Wall is on XY plane. Depth/Relief is Z axis.
-                    # Let's implement that.
-                    # Base pos: (ix, iy, 0). Extrude to (ix, iy, y_offset)
-                    # Or just place block at (ix, iy, y_offset)? "get a heightmap... use that to determine the height"
-                    # Usually means solid column or surface.
-                    # Let's place a column from 0 to y_offset? Or just the surface?
-                    # "blocks should still use the color of the pixel"
-                    # I'll generate a solid column of that block.
-                    for z in range(y_offset + 1):
-                         place_in_module(m, (ix, h - 1 - iy, z), block_id) # Flip Y for image coords
-                else:
-                    # Standard terrain (XZ plane, height is Y)
-                    for y in range(y_offset + 1):
-                        place_in_module(m, (ix, y, iy), block_id)
+    # Compute distances
+    # We add dimensions to broadcast correctly
+    # dists = pixels_sum_sq[:, newaxis] + palette_sum_sq[newaxis, :] - 2 * dot
 
+    pixel_sum_sq = np.sum(pixels_float**2, axis=1) # (N,)
+    dot_prod = np.dot(pixels_float, palette_float.T) # (N, P)
+
+    dists = pixel_sum_sq[:, np.newaxis] + palette_sum_sq[np.newaxis, :] - 2 * dot_prod
+
+    closest_indices = np.argmin(dists, axis=1) # (N,)
+
+    # Now iterate and place blocks
+    for idx, best_idx in enumerate(closest_indices):
+        px = idx % w
+        py = idx // w
+
+        block_id = palette_blocks[best_idx]
+        color = pixels_flat[idx] # uint8 array
+
+        # Map image (x, y) to module (x, y, z)
+        # Default (Horizontal, flat on ground): Image X -> Module X, Image Y -> Module Z
+        # Vertical (Upright): Image X -> Module X, Image Y -> Module Y
+
+        ix, iy = px, py
+
+        if heightmap:
+            # Use brightness for height
+            # Brightness = (R+G+B)/3 or using luminance formula
+            # Normalize to 0..height
+            r, g, b = int(color[0]), int(color[1]), int(color[2])
+            brightness = (r + g + b) / (3.0 * 255.0)
+            # Map 0..1 to 1..height (or 0..height-1?)
+            # Assuming height=1 means flat. height=10 means max height 10.
+            y_offset = int(brightness * (height - 1)) if height > 1 else 0
+
+            if vertical:
+                # Heightmap on vertical plane? "Terrain" usually implies XZ plane.
+                # But if vertical=True, maybe it's a relief map on a wall.
+                # Wall is on XY plane. Depth/Relief is Z axis.
+                # Let's implement that.
+                # Base pos: (ix, iy, 0). Extrude to (ix, iy, y_offset)
+                # Or just place block at (ix, iy, y_offset)? "get a heightmap... use that to determine the height"
+                # Usually means solid column or surface.
+                # Let's place a column from 0 to y_offset? Or just the surface?
+                # "blocks should still use the color of the pixel"
+                # I'll generate a solid column of that block.
+                for z in range(y_offset + 1):
+                        place_in_module(m, (ix, h - 1 - iy, z), block_id) # Flip Y for image coords
             else:
-                # Not a heightmap. Stacking.
-                # If vertical:
-                #   X -> X
-                #   Y -> Y (Image Y usually goes down, Minecraft Y goes up. Flip it?)
-                #   Z -> Stack depth
+                # Standard terrain (XZ plane, height is Y)
+                for y in range(y_offset + 1):
+                    place_in_module(m, (ix, y, iy), block_id)
 
-                # If horizontal:
-                #   X -> X
-                #   Y -> Z
-                #   Z -> Stack height (Y)
+        else:
+            # Not a heightmap. Stacking.
+            # If vertical:
+            #   X -> X
+            #   Y -> Y (Image Y usually goes down, Minecraft Y goes up. Flip it?)
+            #   Z -> Stack depth
 
-                if vertical:
-                    # Image (x,y) -> Module (x,y). Stack on Z.
-                    # Flip image Y to match standard coordinate systems (bottom-left origin vs top-left)
-                    # Minecraft: Y is up. Image: Y is down.
-                    pos_x = ix
-                    pos_y = h - 1 - iy
+            # If horizontal:
+            #   X -> X
+            #   Y -> Z
+            #   Z -> Stack height (Y)
 
-                    for z in range(height):
-                        place_in_module(m, (pos_x, pos_y, z), block_id)
-                else:
-                    # Image (x,y) -> Module (x, z). Stack on Y.
-                    pos_x = ix
-                    pos_z = iy
+            if vertical:
+                # Image (x,y) -> Module (x,y). Stack on Z.
+                # Flip image Y to match standard coordinate systems (bottom-left origin vs top-left)
+                # Minecraft: Y is up. Image: Y is down.
+                pos_x = ix
+                pos_y = h - 1 - iy
 
-                    for y in range(height):
-                        place_in_module(m, (pos_x, y, pos_z), block_id)
+                for z in range(height):
+                    place_in_module(m, (pos_x, pos_y, z), block_id)
+            else:
+                # Image (x,y) -> Module (x, z). Stack on Y.
+                pos_x = ix
+                pos_z = iy
+
+                for y in range(height):
+                    place_in_module(m, (pos_x, y, pos_z), block_id)
 
     return m
