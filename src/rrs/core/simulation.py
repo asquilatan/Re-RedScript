@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import heapq
-import copy
 
 from rrs.core.module import Module
 from rrs.core.block import Block
@@ -90,7 +89,9 @@ class SimulationEngine:
                 # Only concrete blocks participate in the simulation
                 continue
             pos: Position = block.pos  # flatten() already returns absolute positions
-            props = copy.deepcopy(block.properties)
+            # Optimization: Use shallow copy instead of deepcopy for block properties
+            # Block properties are typically immutable primitives (int, str, bool)
+            props = block.properties.copy()
             self.world[pos] = SimulatedBlock(id=block.id, block_type=type(block), properties=props, position=pos)
 
     def run(self) -> None:
