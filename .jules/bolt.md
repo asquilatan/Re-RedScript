@@ -1,0 +1,3 @@
+## 2024-05-23 - Mathematical Optimization of Color Matching
+**Learning:** Euclidean distance calculation in vector space matching can be optimized by expanding the term $||p-q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$. When finding the closest neighbor $q$ for a fixed query $p$, the term $||p||^2$ is constant and can be omitted from the minimization objective.
+**Action:** When implementing nearest neighbor searches or similar distance-based matching, check if constant terms can be removed from the loop or matrix operation to save computational cycles. In `numpy`, this saves an expensive broadcasting addition and a sum-of-squares reduction.

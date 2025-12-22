@@ -92,15 +92,18 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
     palette_sum_sq = np.sum(palette_float**2, axis=1) # (P,)
 
     # Compute distances
-    # We add dimensions to broadcast correctly
-    # dists = pixels_sum_sq[:, newaxis] + palette_sum_sq[newaxis, :] - 2 * dot
+    # Optimization: We want to find argmin_j ||p_i - q_j||^2
+    # ||p - q||^2 = ||p||^2 + ||q||^2 - 2 p.q
+    # ||p||^2 is constant for a given pixel p_i across all palette colors q_j.
+    # So we can minimize: ||q||^2 - 2 p.q
+    # This avoids calculating and broadcasting ||p||^2.
 
-    pixel_sum_sq = np.sum(pixels_float**2, axis=1) # (N,)
     dot_prod = np.dot(pixels_float, palette_float.T) # (N, P)
 
-    dists = pixel_sum_sq[:, np.newaxis] + palette_sum_sq[np.newaxis, :] - 2 * dot_prod
+    # Proxy for distance (omitting pixel_sum_sq term)
+    dists_proxy = palette_sum_sq[np.newaxis, :] - 2 * dot_prod
 
-    closest_indices = np.argmin(dists, axis=1) # (N,)
+    closest_indices = np.argmin(dists_proxy, axis=1) # (N,)
 
     # Now iterate and place blocks
     for idx, best_idx in enumerate(closest_indices):
