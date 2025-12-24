@@ -90,7 +90,7 @@ class SimulationEngine:
                 # Only concrete blocks participate in the simulation
                 continue
             pos: Position = block.pos  # flatten() already returns absolute positions
-            props = copy.deepcopy(block.properties)
+            props = block.properties.copy()
             self.world[pos] = SimulatedBlock(id=block.id, block_type=type(block), properties=props, position=pos)
 
     def run(self) -> None:
