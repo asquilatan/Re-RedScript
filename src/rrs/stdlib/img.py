@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 from PIL import Image
 from rrs.stdlib.utils import create_module, place_in_module
 from rrs.stdlib.palette import find_closest_block, PALETTE_LIST
+from rrs.core.block import Block
 import math
 import numpy as np
 
@@ -126,6 +127,9 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
             # Assuming height=1 means flat. height=10 means max height 10.
             y_offset = int(brightness * (height - 1)) if height > 1 else 0
 
+            # Optimization: check block_id type once per pixel
+            is_str_block = isinstance(block_id, str)
+
             if vertical:
                 # Heightmap on vertical plane? "Terrain" usually implies XZ plane.
                 # But if vertical=True, maybe it's a relief map on a wall.
@@ -138,11 +142,19 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
                 # "blocks should still use the color of the pixel"
                 # I'll generate a solid column of that block.
                 for z in range(y_offset + 1):
+                    # Direct Block instantiation for performance
+                    if is_str_block:
+                        m.children.append(Block(block_id, pos=(ix, h - 1 - iy, z)))
+                    else:
                         place_in_module(m, (ix, h - 1 - iy, z), block_id) # Flip Y for image coords
             else:
                 # Standard terrain (XZ plane, height is Y)
                 for y in range(y_offset + 1):
-                    place_in_module(m, (ix, y, iy), block_id)
+                    # Direct Block instantiation for performance
+                    if is_str_block:
+                        m.children.append(Block(block_id, pos=(ix, y, iy)))
+                    else:
+                        place_in_module(m, (ix, y, iy), block_id)
 
         else:
             # Not a heightmap. Stacking.
@@ -156,6 +168,9 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
             #   Y -> Z
             #   Z -> Stack height (Y)
 
+            # Optimization: check block_id type once per pixel
+            is_str_block = isinstance(block_id, str)
+
             if vertical:
                 # Image (x,y) -> Module (x,y). Stack on Z.
                 # Flip image Y to match standard coordinate systems (bottom-left origin vs top-left)
@@ -164,13 +179,21 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
                 pos_y = h - 1 - iy
 
                 for z in range(height):
-                    place_in_module(m, (pos_x, pos_y, z), block_id)
+                    # Direct Block instantiation for performance
+                    if is_str_block:
+                        m.children.append(Block(block_id, pos=(pos_x, pos_y, z)))
+                    else:
+                        place_in_module(m, (pos_x, pos_y, z), block_id)
             else:
                 # Image (x,y) -> Module (x, z). Stack on Y.
                 pos_x = ix
                 pos_z = iy
 
                 for y in range(height):
-                    place_in_module(m, (pos_x, y, pos_z), block_id)
+                    # Direct Block instantiation for performance
+                    if is_str_block:
+                        m.children.append(Block(block_id, pos=(pos_x, y, pos_z)))
+                    else:
+                        place_in_module(m, (pos_x, y, pos_z), block_id)
 
     return m
