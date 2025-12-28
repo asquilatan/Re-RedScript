@@ -1,11 +1,19 @@
-from typing import Optional, Tuple
+from typing import Optional
 from PIL import Image
 from rrs.stdlib.utils import create_module, place_in_module
-from rrs.stdlib.palette import find_closest_block, PALETTE_LIST
-import math
+from rrs.stdlib.palette import PALETTE_LIST
 import numpy as np
 
-def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int] = None, height: int = 1, vertical: bool = False, rotate: float = 0, heightmap: bool = False):
+
+def ConvertPicture(
+    path: str,
+    length: Optional[int] = None,
+    width: Optional[int] = None,
+    height: int = 1,
+    vertical: bool = False,
+    rotate: float = 0,
+    heightmap: bool = False
+):
     """
     Converts an image file to a Module of blocks.
 
@@ -36,7 +44,8 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
 
     # 1. Handle Rotate
     if rotate != 0:
-        img = img.rotate(-rotate, expand=True) # Negative because PIL rotates counter-clockwise
+        # Negative because PIL rotates counter-clockwise
+        img = img.rotate(-rotate, expand=True)
 
     # 2. Handle Resize
     # Determine target size
@@ -46,7 +55,8 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
     # Prompt: "The length and with should resize the dimensions of the image"
     # "defaults to l and w of image"
 
-    target_w, target_h = img.size # PIL uses (width, height) which maps to (x, y) usually
+    # PIL uses (width, height) which maps to (x, y) usually
+    target_w, target_h = img.size
 
     if length is not None and width is not None:
         target_w, target_h = int(length), int(width)
@@ -67,15 +77,15 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
 
     # Optimization: Use Numpy for vectorized color matching
     # Convert image to numpy array
-    img_array = np.array(img) # (h, w, 3)
+    img_array = np.array(img)  # (h, w, 3)
 
     # Prepare palette
-    palette_colors = np.array([c for c, _ in PALETTE_LIST]) # (P, 3)
+    palette_colors = np.array([c for c, _ in PALETTE_LIST])  # (P, 3)
     palette_blocks = [b for _, b in PALETTE_LIST]
 
     # Flatten image for processing
     h, w, _ = img_array.shape
-    pixels_flat = img_array.reshape(-1, 3) # (N, 3)
+    pixels_flat = img_array.reshape(-1, 3)  # (N, 3)
 
     # Vectorized Euclidean distance calculation
     # (a-b)^2 = a^2 + b^2 - 2ab
@@ -89,18 +99,26 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
     # Precompute terms
     # We can precompute palette term, but since ConvertPicture is likely called once per script run, calculating here is fine.
     # Note: If PALETTE_LIST is constant, we could cache palette_sum_sq.
-    palette_sum_sq = np.sum(palette_float**2, axis=1) # (P,)
+    palette_sum_sq = np.sum(palette_float**2, axis=1)  # (P,)
 
     # Compute distances
     # We add dimensions to broadcast correctly
     # dists = pixels_sum_sq[:, newaxis] + palette_sum_sq[newaxis, :] - 2 * dot
+    #
+    # Optimization:
+    # argmin_j ( ||p_i - q_j||^2 ) = argmin_j ( ||p_i||^2 + ||q_j||^2 - 2 p_i . q_j )
+    # Since ||p_i||^2 (pixel_sum_sq) is constant for a given pixel i across all palette entries j,
+    # it doesn't affect the argmin. We can omit it.
+    # We minimize: ||q_j||^2 - 2 p_i . q_j
+    # This avoids calculating pixel_sum_sq and the broadcasting addition.
 
-    pixel_sum_sq = np.sum(pixels_float**2, axis=1) # (N,)
-    dot_prod = np.dot(pixels_float, palette_float.T) # (N, P)
+    dot_prod = np.dot(pixels_float, palette_float.T)  # (N, P)
 
-    dists = pixel_sum_sq[:, np.newaxis] + palette_sum_sq[np.newaxis, :] - 2 * dot_prod
+    # dists = pixel_sum_sq[:, np.newaxis] + palette_sum_sq[np.newaxis, :] - 2 * dot_prod
+    # effectively comparing:
+    scores = palette_sum_sq[np.newaxis, :] - 2 * dot_prod
 
-    closest_indices = np.argmin(dists, axis=1) # (N,)
+    closest_indices = np.argmin(scores, axis=1)  # (N,)
 
     # Now iterate and place blocks
     for idx, best_idx in enumerate(closest_indices):
@@ -108,7 +126,7 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
         py = idx // w
 
         block_id = palette_blocks[best_idx]
-        color = pixels_flat[idx] # uint8 array
+        color = pixels_flat[idx]  # uint8 array
 
         # Map image (x, y) to module (x, y, z)
         # Default (Horizontal, flat on ground): Image X -> Module X, Image Y -> Module Z
@@ -138,7 +156,8 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
                 # "blocks should still use the color of the pixel"
                 # I'll generate a solid column of that block.
                 for z in range(y_offset + 1):
-                        place_in_module(m, (ix, h - 1 - iy, z), block_id) # Flip Y for image coords
+                    # Flip Y for image coords
+                    place_in_module(m, (ix, h - 1 - iy, z), block_id)
             else:
                 # Standard terrain (XZ plane, height is Y)
                 for y in range(y_offset + 1):
