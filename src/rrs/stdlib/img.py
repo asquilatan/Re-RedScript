@@ -39,21 +39,11 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
         img = img.rotate(-rotate, expand=True) # Negative because PIL rotates counter-clockwise
 
     # 2. Handle Resize
-    # Determine target size
-    # If user provided length/width, force resize.
-    # If user provided one, scale proportionally? The prompt says "length and width should resize the dimensions".
-    # Assuming if both provided, non-uniform scale. If one, uniform?
-    # Prompt: "The length and with should resize the dimensions of the image"
-    # "defaults to l and w of image"
-
-    target_w, target_h = img.size # PIL uses (width, height) which maps to (x, y) usually
+    target_w, target_h = img.size
 
     if length is not None and width is not None:
         target_w, target_h = int(length), int(width)
     elif length is not None:
-        # Scale width to length, keep aspect ratio?
-        # Usually length maps to X. Width maps to Z (or Y in image terms).
-        # Let's assume length -> image width, width -> image height.
         ratio = length / float(img.size[0])
         target_w = int(length)
         target_h = int(img.size[1] * ratio)
@@ -66,7 +56,6 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
         img = img.resize((target_w, target_h), Image.Resampling.NEAREST)
 
     # Optimization: Use Numpy for vectorized color matching
-    # Convert image to numpy array
     img_array = np.array(img) # (h, w, 3)
 
     # Prepare palette
@@ -79,21 +68,10 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
 
     # Vectorized Euclidean distance calculation
     # (a-b)^2 = a^2 + b^2 - 2ab
-    # term1: sum(pixels^2, axis=1) -> (N,)
-    # term2: sum(palette^2, axis=1) -> (P,)
-    # term3: 2 * pixels @ palette.T -> (N, P)
-
     pixels_float = pixels_flat.astype(float)
     palette_float = palette_colors.astype(float)
 
-    # Precompute terms
-    # We can precompute palette term, but since ConvertPicture is likely called once per script run, calculating here is fine.
-    # Note: If PALETTE_LIST is constant, we could cache palette_sum_sq.
     palette_sum_sq = np.sum(palette_float**2, axis=1) # (P,)
-
-    # Compute distances
-    # We add dimensions to broadcast correctly
-    # dists = pixels_sum_sq[:, newaxis] + palette_sum_sq[newaxis, :] - 2 * dot
 
     pixel_sum_sq = np.sum(pixels_float**2, axis=1) # (N,)
     dot_prod = np.dot(pixels_float, palette_float.T) # (N, P)

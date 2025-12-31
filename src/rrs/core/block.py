@@ -5,24 +5,20 @@ from rrs.core.module import Module
 from rrs.utils.math import add_vec3
 
 class Block(Module):
-    """
-    Represents a single Minecraft block.
-    """
+    """Represents a single Minecraft block."""
 
     def __init__(self, id: str, pos: Tuple[int, int, int] = (0, 0, 0), **kwargs):
         super().__init__(id, pos, size=(1, 1, 1), **kwargs)
 
     def flatten(self, offset: Tuple[int, int, int] = (0, 0, 0)) -> List['Module']:
-        # Return a copy of self with absolute position
-        # Optimization: Use __new__ and __dict__ copy to bypass __init__ overhead
-        # (~76% faster)
+        """Returns a list containing a copy of this block with absolute position."""
         new_block = self.__class__.__new__(self.__class__)
         new_block.__dict__ = self.__dict__.copy()
         new_block.pos = add_vec3(self.pos, offset)
         return [new_block]
 
 def create_block_class(name: str, block_def: Dict[str, Any]) -> Type[Block]:
-    """Helper to dynamically create a Block subclass."""
+    """Dynamically creates a Block subclass from a definition."""
     block_id = block_def["id"]
     defaults = block_def.get("defaults", {})
     

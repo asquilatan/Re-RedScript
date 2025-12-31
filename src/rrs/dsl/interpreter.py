@@ -90,17 +90,14 @@ class Interpreter:
         import math
         import random
         
-        # Functions
         self.globals.set("range", range)
         self.globals.set("print", print)
         self.globals.set("Module", self._create_module)
         
-        # Boolean/None literals
         self.globals.set("True", True)
         self.globals.set("False", False)
         self.globals.set("None", None)
         
-        # Math functions
         self.globals.set("sin", math.sin)
         self.globals.set("cos", math.cos)
         self.globals.set("tan", math.tan)
@@ -122,34 +119,27 @@ class Interpreter:
         self.globals.set("PI", math.pi)
         self.globals.set("E", math.e)
         
-        # List functions
         self.globals.set("len", len)
         self.globals.set("list", list)
         self.globals.set("append", lambda lst, item: lst.append(item) or lst)
         self.globals.set("pop", lambda lst: lst.pop())
         self.globals.set("insert", lambda lst, i, item: lst.insert(i, item) or lst)
         
-        # Type conversion
         self.globals.set("str", str)
         self.globals.set("int", int)
         self.globals.set("float", float)
         self.globals.set("bool", bool)
         
-        # Random functions
         self.globals.set("random", random.random)
         self.globals.set("randint", random.randint)
         
-        # Assertion
         from rrs.core.assertion import rrs_assert
         self.globals.set("assert", rrs_assert)
         
-        # Export function
         self.globals.set("export", self._export_module)
         
-        # Add function - explicitly add block/module to current module
         self.globals.set("add", self._add_to_current_module)
 
-        # Simulation helpers
         self.globals.set("Simulate", self.func_Simulate)
         self.globals.set("ChangeState", self.func_ChangeState)
 

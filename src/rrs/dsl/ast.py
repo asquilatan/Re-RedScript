@@ -3,11 +3,12 @@ from typing import List, Union, Optional, Any
 
 @dataclass
 class Node:
+    """Base class for AST nodes."""
     pass
 
-# Expressions
 @dataclass
 class Expr(Node):
+    """Base class for expression nodes."""
     pass
 
 @dataclass
@@ -28,7 +29,6 @@ class BinaryOp(Expr):
 class TupleExpr(Expr):
     elements: List[Expr]
 
-# Arguments
 @dataclass
 class Arg(Node):
     value: Expr
@@ -38,9 +38,9 @@ class Kwarg(Node):
     name: str
     value: Expr
 
-# Statements
 @dataclass
 class Statement(Node):
+    """Base class for statement nodes."""
     pass
 
 @dataclass
@@ -62,8 +62,6 @@ class ModuleDef(Statement):
 @dataclass
 class Program(Node):
     statements: List[Statement]
-
-# New Nodes for Advanced Features
 
 @dataclass
 class Assignment(Statement):
@@ -87,7 +85,7 @@ class ListExpr(Expr):
 
 @dataclass
 class DictExpr(Expr):
-    # pairs is a list of (key_expr, value_expr) tuples
+    """pairs is a list of (key_expr, value_expr) tuples"""
     pairs: List[tuple]
 
 @dataclass
@@ -114,7 +112,7 @@ class ImportStmt(Statement):
 @dataclass
 class FromImportStmt(Statement):
     module_name: str
-    names: List[str]  # List of names to import
+    names: List[str]
 
 @dataclass
 class MethodCall(Expr):
