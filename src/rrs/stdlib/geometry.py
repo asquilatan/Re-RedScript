@@ -79,19 +79,41 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
-    
+    r_sq = r**2
+    r_inner_sq = (r - 1)**2
+
     for x in range(cx - r, cx + r + 1):
+        dx = x - cx
+        dx_sq = dx**2
         for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+            dy = y - cy
+            dxy_sq = dx_sq + dy**2
+
+            if dxy_sq > r_sq:
+                continue
+
+            z_max = int(math.isqrt(r_sq - dxy_sq))
+
+            if fill:
+                for z in range(cz - z_max, cz + z_max + 1):
+                    points.append((x, y, z))
+            else:
+                if dxy_sq >= r_inner_sq:
+                    for z in range(cz - z_max, cz + z_max + 1):
+                        points.append((x, y, z))
+                else:
+                    min_sq = r_inner_sq - dxy_sq
+                    z_min = math.isqrt(min_sq)
+                    if z_min * z_min < min_sq:
+                        z_min += 1
+
+                    for z_offset in range(z_min, z_max + 1):
+                        points.append((x, y, cz + z_offset))
+                        if z_offset != 0:
+                            points.append((x, y, cz - z_offset))
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
