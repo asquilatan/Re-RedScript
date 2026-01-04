@@ -12,10 +12,16 @@ class Block(Module):
 
     def flatten(self, offset: Tuple[int, int, int] = (0, 0, 0)) -> List['Module']:
         """Returns a list containing a copy of this block with absolute position."""
+        results: List['Module'] = []
+        self._flatten_into(offset, results)
+        return results
+
+    def _flatten_into(self, offset: Tuple[int, int, int], accumulator: List['Module']):
+        """Internal helper to flatten into an existing list."""
         new_block = self.__class__.__new__(self.__class__)
         new_block.__dict__ = self.__dict__.copy()
         new_block.pos = add_vec3(self.pos, offset)
-        return [new_block]
+        accumulator.append(new_block)
 
 def create_block_class(name: str, block_def: Dict[str, Any]) -> Type[Block]:
     """Dynamically creates a Block subclass from a definition."""
