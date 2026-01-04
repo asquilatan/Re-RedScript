@@ -60,9 +60,18 @@ class Module:
         return self
 
     def flatten(self, offset: Tuple[int, int, int] = (0, 0, 0)) -> List['Module']:
-        """Recursively flattens the module hierarchy into a list of blocks with absolute positions."""
+        """Recursively flattens the module hierarchy into a list of blocks with absolute positions."""  # noqa: E501
+        results: List['Module'] = []
+        self._flatten_into(offset, results)
+        return results
+
+    def _flatten_into(self, offset: Tuple[int, int, int], accumulator: List['Module']):
+        """Internal helper to flatten into an existing list."""
         absolute_pos = add_vec3(self.pos, offset)
-        flat_list = []
         for child in self.children:
-            flat_list.extend(child.flatten(absolute_pos))
-        return flat_list
+            # Check for _flatten_into to allow duck typing if needed,
+            # though usually all children are Modules.
+            if hasattr(child, '_flatten_into'):
+                child._flatten_into(absolute_pos, accumulator)
+            else:
+                accumulator.extend(child.flatten(absolute_pos))
