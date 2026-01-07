@@ -73,10 +73,10 @@ def ConvertPicture(path: str, length: Optional[int] = None, width: Optional[int]
 
     palette_sum_sq = np.sum(palette_float**2, axis=1) # (P,)
 
-    pixel_sum_sq = np.sum(pixels_float**2, axis=1) # (N,)
     dot_prod = np.dot(pixels_float, palette_float.T) # (N, P)
 
-    dists = pixel_sum_sq[:, np.newaxis] + palette_sum_sq[np.newaxis, :] - 2 * dot_prod
+    # Optimization: Omit pixel_sum_sq as it's constant per row and doesn't affect argmin order
+    dists = palette_sum_sq[np.newaxis, :] - 2 * dot_prod
 
     closest_indices = np.argmin(dists, axis=1) # (N,)
 
