@@ -79,19 +79,72 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    # Optimization: Iterate only over valid ranges using circle equation
+    for x in range(-r, r + 1):
+        x2 = x*x
+        # x^2 <= r^2 is guaranteed by range, but check just in case of rounding weirdness? No, integer logic holds.
+
+        # Max y for this x
+        y_lim = math.isqrt(r_sq - x2)
+
+        for y in range(-y_lim, y_lim + 1):
+            y2 = y*y
+            rem_sq = r_sq - x2 - y2
+
+            # Max z for this x, y
+            z_lim = math.isqrt(rem_sq)
+
+            if fill:
+                # Add entire column
+                for z in range(-z_lim, z_lim + 1):
+                    points.append((cx + x, cy + y, cz + z))
+            else:
+                # Shell only: points where dist_sq >= (r-1)^2
+                # We need z^2 >= (r-1)^2 - x^2 - y^2
+                inner_r_sq = (r - 1) ** 2
+                min_z_sq = inner_r_sq - x2 - y2
+
+                if min_z_sq <= 0:
+                    # The inner sphere doesn't reach this (x, y) column, or we are outside it.
+                    # Specifically, x^2 + y^2 >= inner_r_sq.
+                    # So ALL points in the column are valid shell points (because they are <= r_sq by z_lim logic).
+                    for z in range(-z_lim, z_lim + 1):
+                        points.append((cx + x, cy + y, cz + z))
+                else:
+                    # We have a hole in the middle. We need |z| >= sqrt(min_z_sq).
+                    # effectively |z| > sqrt(min_z_sq - 1)?
+                    # The condition is dist_sq >= inner_r_sq.
+                    # z^2 >= min_z_sq.
+                    # let val = isqrt(min_z_sq).
+                    # if val*val == min_z_sq: z_gap = val. (since val^2 = min_z_sq >= min_z_sq is true)
+                    # if val*val < min_z_sq: z_gap = val + 1. (val^2 < min_z_sq, so val is not enough)
+
+                    val = math.isqrt(min_z_sq)
+                    if val * val < min_z_sq:
+                        z_gap = val + 1
+                    else:
+                        z_gap = val
+
+                    # Add -z_lim ... -z_gap
+                    for z in range(-z_lim, -z_gap + 1):
+                        points.append((cx + x, cy + y, cz + z))
+
+                    # Add z_gap ... z_lim
+                    # Note: if z_gap == 0, we double count 0 if we are not careful.
+                    # But min_z_sq > 0 here, so z_gap >= 1 (since if min_z_sq=0 we took the other branch).
+                    # wait, if min_z_sq=1, val=1. z_gap=1.
+                    # range(-z_lim, 0) -> ... -1.
+                    # range(1, z_lim+1) -> 1 ...
+                    # 0 is skipped. Correct, because 0^2=0 < 1.
+
+                    for z in range(z_gap, z_lim + 1):
+                         points.append((cx + x, cy + y, cz + z))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
