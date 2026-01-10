@@ -3,9 +3,9 @@
 **Action:** When cloning simple state-container objects in hot paths, prefer `__new__` + `__dict__` copy over `copy.copy`, provided `__slots__` are not used.
 
 ## 2026-01-07 - ConvertPicture Optimization
-**Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance () is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
-**Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
-
-## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-05-26 - Rasterize Sphere Optimization
+**Learning:** Replaced brute-force bounding box iteration ($O(R^3)$) with exact integer bound calculations using `math.isqrt`. For hollow spheres (`fill=False`), this allows skipping the inner core entirely, effectively reducing complexity to $O(R^2)$ (surface area). Measured ~60x speedup for r=100 (3.8s -> 0.06s). Also replaced `set` with `list` as the algorithm now guarantees uniqueness, saving hashing overhead.
+**Action:** For voxel rasterization of geometric shapes, always compute exact integer bounds to minimize checks, especially for hollow shells.
