@@ -79,19 +79,49 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
+    r_inner_sq = (r - 1) ** 2
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    for x in range(-r, r + 1):
+        x_sq = x * x
+        # This check is technically redundant if y bounds are correct, but good for skipping early
+        if x_sq > r_sq: continue
+
+        y_lim = math.isqrt(r_sq - x_sq)
+
+        for y in range(-y_lim, y_lim + 1):
+            y_sq = y * y
+            xy_sq = x_sq + y_sq
+
+            z_lim = math.isqrt(r_sq - xy_sq)
+
+            if fill:
+                for z in range(-z_lim, z_lim + 1):
+                    points.append((cx + x, cy + y, cz + z))
+            else:
+                # fill=False, shell only
+                # We need xy_sq + z^2 >= r_inner_sq
+                rem = r_inner_sq - xy_sq
+
+                if rem <= 0:
+                    # All z in range are valid shell points (xy is far enough from center)
+                    for z in range(-z_lim, z_lim + 1):
+                        points.append((cx + x, cy + y, cz + z))
+                else:
+                    # We need |z| >= sqrt(rem)
+                    z_min = math.isqrt(rem)
+                    if z_min * z_min < rem:
+                        z_min += 1
+
+                    if z_min <= z_lim:
+                        for z in range(-z_lim, -z_min + 1):
+                            points.append((cx + x, cy + y, cz + z))
+                        for z in range(z_min, z_lim + 1):
+                            points.append((cx + x, cy + y, cz + z))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
