@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-05-23 - rasterize_sphere Optimization
+**Learning:** Optimizing geometric rasterization by calculating exact loop bounds (using `math.isqrt`) instead of iterating a bounding box and checking distance reduced execution time for a r=100 hollow sphere from ~3.87s to ~0.06s (~62x speedup).
+**Action:** For geometric rasterization tasks, always prefer mathematically derived loop bounds over bounding box iteration with conditional checks, especially for hollow figures where the inner volume can be skipped entirely.
