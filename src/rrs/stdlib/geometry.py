@@ -79,19 +79,55 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
+    r_inner_sq = (r - 1) ** 2
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    for x_off in range(-r, r + 1):
+        x2 = x_off * x_off
+
+        for y_off in range(-r, r + 1):
+            y2 = y_off * y_off
+            xy2 = x2 + y2
+
+            if xy2 > r_sq:
+                continue
+
+            # Calculate max Z offset for the outer sphere
+            rem_sq = r_sq - xy2
+            z_lim = math.isqrt(rem_sq)
+
+            x = cx + x_off
+            y = cy + y_off
+
+            if fill:
+                for z_off in range(-z_lim, z_lim + 1):
+                    points.append((x, y, cz + z_off))
+            else:
+                # For shell, we exclude the inner sphere: x^2 + y^2 + z^2 < (r-1)^2
+                # So we need z^2 >= (r-1)^2 - (x^2 + y^2)
+                rhs = r_inner_sq - xy2
+
+                if rhs <= 0:
+                    # Column is outside inner sphere (or on boundary), keep all Z
+                    for z_off in range(-z_lim, z_lim + 1):
+                        points.append((x, y, cz + z_off))
+                else:
+                    # Column intersects inner sphere, skip the middle
+                    # z^2 >= rhs  =>  |z| >= ceil(sqrt(rhs))
+                    # ceil(sqrt(rhs)) for integer rhs > 0 is isqrt(rhs - 1) + 1
+                    z_inner = math.isqrt(rhs - 1) + 1
+
+                    # Negative side
+                    for z_off in range(-z_lim, -z_inner + 1):
+                        points.append((x, y, cz + z_off))
+
+                    # Positive side
+                    for z_off in range(z_inner, z_lim + 1):
+                        points.append((x, y, cz + z_off))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
