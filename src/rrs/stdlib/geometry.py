@@ -79,19 +79,52 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
+    r_minus_1_sq = (r - 1) ** 2
     
+    # Iterate x within bounds
     for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+        dx = x - cx
+        dx_sq = dx * dx
+
+        # Iterate y within bounds
+        max_dy = math.isqrt(r_sq - dx_sq)
+        for y in range(cy - max_dy, cy + max_dy + 1):
+            dy = y - cy
+            dy_sq = dy * dy
+            rho_sq = dx_sq + dy_sq
+
+            # z bounds
+            max_dz = math.isqrt(r_sq - rho_sq)
+
+            if fill:
+                # Add all z in range
+                for z in range(cz - max_dz, cz + max_dz + 1):
+                    points.append((x, y, z))
+            else:
+                # Hollow
+                if rho_sq >= r_minus_1_sq:
+                    # On the "rim", so the whole z-column is part of the shell
+                    for z in range(cz - max_dz, cz + max_dz + 1):
+                        points.append((x, y, z))
+                else:
+                    # Inside the core radius. There is a hole in Z.
+                    target_dz_sq = r_minus_1_sq - rho_sq
+                    # We need dz^2 >= target_dz_sq
+                    # minimal |dz|
+                    min_dz = math.isqrt(target_dz_sq)
+                    if min_dz * min_dz < target_dz_sq:
+                        min_dz += 1
+
+                    # Add Top cap
+                    for z in range(cz + min_dz, cz + max_dz + 1):
+                        points.append((x, y, z))
+                    # Add Bottom cap
+                    for z in range(cz - max_dz, cz - min_dz + 1):
+                        points.append((x, y, z))
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
