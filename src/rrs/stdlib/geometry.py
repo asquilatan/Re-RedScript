@@ -1,22 +1,24 @@
 import math
 
+
 def distance(p1, p2):
     return math.sqrt(sum((a - b) ** 2 for a, b in zip(p1, p2)))
+
 
 def bresenham_line(start, end):
     """Generates points for a 3D line using Bresenham's algorithm."""
     x1, y1, z1 = start
     x2, y2, z2 = end
     points = []
-    
+
     dx = abs(x2 - x1)
     dy = abs(y2 - y1)
     dz = abs(z2 - z1)
-    
+
     xs = 1 if x2 > x1 else -1
     ys = 1 if y2 > y1 else -1
     zs = 1 if z2 > z1 else -1
-    
+
     if dx >= dy and dx >= dz:
         p1 = 2 * dy - dx
         p2 = 2 * dz - dx
@@ -59,9 +61,10 @@ def bresenham_line(start, end):
                 p2 -= 2 * dz
             p1 += 2 * dy
             p2 += 2 * dx
-            
+
     points.append((x1, y1, z1))
     return points
+
 
 def bezier_curve(points, segments=20):
     """Calculates points along a cubic Bezier curve."""
@@ -70,90 +73,167 @@ def bezier_curve(points, segments=20):
     for t in [i / segments for i in range(segments + 1)]:
         x, y, z = 0, 0, 0
         for i, pos in enumerate(points):
-            bernstein = math.factorial(n) / (math.factorial(i) * math.factorial(n - i)) * (t ** i) * ((1 - t) ** (n - i))
+            bernstein = (
+                math.factorial(n)
+                / (math.factorial(i) * math.factorial(n - i))
+                * (t**i)
+                * ((1 - t) ** (n - i))
+            )
             x += pos[0] * bernstein
             y += pos[1] * bernstein
             z += pos[2] * bernstein
         curve_points.append((int(round(x)), int(round(y)), int(round(z))))
     return curve_points
 
+
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
-    
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    r_sq = r * r
 
-def rasterize_cylinder(base, radius, height, axis='y', fill=False):
+    # Pre-calculate squared inner radius for shell
+    r_inner = r - 1
+    r_inner_sq = r_inner * r_inner
+
+    for dx in range(-r, r + 1):
+        x = cx + dx
+        dx2 = dx * dx
+        for dy in range(-r, r + 1):
+            y = cy + dy
+            r2_xy = dx2 + dy * dy
+
+            if r2_xy > r_sq:
+                continue
+
+            # Calculate max Z offset
+            dz_max = math.isqrt(r_sq - r2_xy)
+
+            if fill:
+                # Fill mode: add all points in the column
+                for dz in range(-dz_max, dz_max + 1):
+                    points.append((x, y, cz + dz))
+            else:
+                # Shell mode
+                if r2_xy > r_inner_sq:
+                    # Outside inner sphere in XY projection
+                    # All Zs within sphere bounds are part of the shell
+                    for dz in range(-dz_max, dz_max + 1):
+                        points.append((x, y, cz + dz))
+                else:
+                    # Inside inner sphere in XY projection
+                    # Determine Zs that are OUTSIDE the inner sphere
+                    # inner radius <= dist < outer radius
+                    # dz^2 >= r_inner^2 - r2_xy
+                    k = r_inner_sq - r2_xy
+                    dz_min = math.isqrt(k)
+                    if dz_min * dz_min < k:
+                        dz_min += 1
+
+                    # Add bottom shell cap
+                    for dz in range(-dz_max, -dz_min + 1):
+                        points.append((x, y, cz + dz))
+
+                    # Add top shell cap (if ranges don't overlap/meet at 0)
+                    start_top = dz_min if dz_min > 0 else 1
+                    for dz in range(start_top, dz_max + 1):
+                        points.append((x, y, cz + dz))
+
+    return points
+
+
+def rasterize_cylinder(base, radius, height, axis="y", fill=False):
     bx, by, bz = base
     points = set()
     r = int(radius)
     h = int(height)
-    
+
     # Simple axis alignment
-    if axis == 'y':
+    if axis == "y":
         for y in range(by, by + h):
             for x in range(bx - r, bx + r + 1):
                 for z in range(bz - r, bz + r + 1):
-                    dist_sq = (x - bx)**2 + (z - bz)**2
+                    dist_sq = (x - bx) ** 2 + (z - bz) ** 2
                     if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or y == by or y == by + h - 1:
-                             points.add((x, y, z))
-    elif axis == 'x':
-         for x in range(bx, bx + h):
+                        if (
+                            fill
+                            or dist_sq >= (r - 1) ** 2
+                            or y == by
+                            or y == by + h - 1
+                        ):
+                            points.add((x, y, z))
+    elif axis == "x":
+        for x in range(bx, bx + h):
             for y in range(by - r, by + r + 1):
                 for z in range(bz - r, bz + r + 1):
-                    dist_sq = (y - by)**2 + (z - bz)**2
+                    dist_sq = (y - by) ** 2 + (z - bz) ** 2
                     if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or x == bx or x == bx + h - 1:
-                             points.add((x, y, z))
-    elif axis == 'z':
+                        if (
+                            fill
+                            or dist_sq >= (r - 1) ** 2
+                            or x == bx
+                            or x == bx + h - 1
+                        ):
+                            points.add((x, y, z))
+    elif axis == "z":
         for z in range(bz, bz + h):
             for x in range(bx - r, bx + r + 1):
                 for y in range(by - r, by + r + 1):
-                    dist_sq = (x - bx)**2 + (y - by)**2
+                    dist_sq = (x - bx) ** 2 + (y - by) ** 2
                     if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or z == bz or z == bz + h - 1:
-                             points.add((x, y, z))
-                             
+                        if (
+                            fill
+                            or dist_sq >= (r - 1) ** 2
+                            or z == bz
+                            or z == bz + h - 1
+                        ):
+                            points.add((x, y, z))
+
     return list(points)
+
 
 def catmull_rom_spline(points, segments=10):
     """Calculates points along a Catmull-Rom spline passing through all points."""
     if len(points) < 2:
         return points
-        
+
     curve_points = []
-    
+
     # Duplicate start/end points to handle boundaries
     # P[0], P[0], P[1], P[2] ... P[N-1], P[N-1]
     extended_points = [points[0]] + points + [points[-1]]
-    
+
     for i in range(len(points) - 1):
         p0 = extended_points[i]
-        p1 = extended_points[i+1]
-        p2 = extended_points[i+2]
-        p3 = extended_points[i+3]
-        
+        p1 = extended_points[i + 1]
+        p2 = extended_points[i + 2]
+        p3 = extended_points[i + 3]
+
         for j in range(segments):
             t = j / segments
             t2 = t * t
             t3 = t2 * t
-            
-            x = 0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3)
-            y = 0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
-            z = 0.5 * ((2 * p1[2]) + (-p0[2] + p2[2]) * t + (2 * p0[2] - 5 * p1[2] + 4 * p2[2] - p3[2]) * t2 + (-p0[2] + 3 * p1[2] - 3 * p2[2] + p3[2]) * t3)
-            
+
+            x = 0.5 * (
+                (2 * p1[0])
+                + (-p0[0] + p2[0]) * t
+                + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2
+                + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3
+            )
+            y = 0.5 * (
+                (2 * p1[1])
+                + (-p0[1] + p2[1]) * t
+                + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2
+                + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3
+            )
+            z = 0.5 * (
+                (2 * p1[2])
+                + (-p0[2] + p2[2]) * t
+                + (2 * p0[2] - 5 * p1[2] + 4 * p2[2] - p3[2]) * t2
+                + (-p0[2] + 3 * p1[2] - 3 * p2[2] + p3[2]) * t3
+            )
+
             curve_points.append((int(round(x)), int(round(y)), int(round(z))))
-            
+
     curve_points.append(points[-1])
     return curve_points

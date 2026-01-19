@@ -3,9 +3,9 @@
 **Action:** When cloning simple state-container objects in hot paths, prefer `__new__` + `__dict__` copy over `copy.copy`, provided `__slots__` are not used.
 
 ## 2026-01-07 - ConvertPicture Optimization
-**Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance () is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
-**Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
-
-## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2024-05-24 - Geometry Rasterization Bounds
+**Learning:** Iterating a bounding box and checking distance conditions is prohibitive ($O(N^3)$) for large geometric figures, even hollow ones. Using `math.isqrt` to analytically determine loop bounds ($O(N^2)$) yields massive speedups (~37x for Sphere) and eliminates the need for `set` deduplication since coordinates are generated uniquely.
+**Action:** For voxel rasterization, always solve the geometric inequality to determine loop ranges instead of filtering points from a bounding box.
