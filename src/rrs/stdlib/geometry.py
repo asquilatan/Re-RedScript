@@ -95,37 +95,98 @@ def rasterize_sphere(center, radius, fill=False):
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
-    points = set()
+    points = []
     r = int(radius)
     h = int(height)
     
-    # Simple axis alignment
+    # Precompute 2D slice points (disk and ring)
+    # This avoids recomputing for every slice along the height
+    full_disk = []
+    ring = []
+
+    r_sq = r * r
+    r_inner_sq = (r - 1) ** 2
+
+    for u in range(-r, r + 1):
+        u_sq = u * u
+        if u_sq > r_sq: continue
+
+        v_limit = math.isqrt(r_sq - u_sq)
+
+        lower_sq = r_inner_sq - u_sq
+
+        if lower_sq <= 0:
+            # Entire chord is within ring (or inner radius doesn't reach here)
+            for v in range(-v_limit, v_limit + 1):
+                pt = (u, v)
+                full_disk.append(pt)
+                ring.append(pt)
+        else:
+            min_v = math.isqrt(lower_sq)
+            if min_v * min_v < lower_sq:
+                min_v += 1
+
+            for v in range(-v_limit, v_limit + 1):
+                pt = (u, v)
+                full_disk.append(pt)
+                if abs(v) >= min_v:
+                    ring.append(pt)
+
+    # Generate 3D points based on axis
     if axis == 'y':
-        for y in range(by, by + h):
-            for x in range(bx - r, bx + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (x - bx)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or y == by or y == by + h - 1:
-                             points.add((x, y, z))
+        # Disk/Ring on (x, z) plane
+        if fill:
+            for y in range(by, by + h):
+                for dx, dz in full_disk:
+                    points.append((bx + dx, y, bz + dz))
+        else:
+            # Caps
+            if h > 0:
+                for dx, dz in full_disk:
+                    points.append((bx + dx, by, bz + dz))
+            if h > 1:
+                for dx, dz in full_disk:
+                    points.append((bx + dx, by + h - 1, bz + dz))
+            # Middle
+            for y in range(by + 1, by + h - 1):
+                for dx, dz in ring:
+                    points.append((bx + dx, y, bz + dz))
+
     elif axis == 'x':
-         for x in range(bx, bx + h):
-            for y in range(by - r, by + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (y - by)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or x == bx or x == bx + h - 1:
-                             points.add((x, y, z))
+        # Disk/Ring on (y, z) plane
+        if fill:
+            for x in range(bx, bx + h):
+                for dy, dz in full_disk:
+                    points.append((x, by + dy, bz + dz))
+        else:
+             if h > 0:
+                for dy, dz in full_disk:
+                    points.append((bx, by + dy, bz + dz))
+             if h > 1:
+                for dy, dz in full_disk:
+                    points.append((bx + h - 1, by + dy, bz + dz))
+             for x in range(bx + 1, bx + h - 1):
+                for dy, dz in ring:
+                    points.append((x, by + dy, bz + dz))
+
     elif axis == 'z':
-        for z in range(bz, bz + h):
-            for x in range(bx - r, bx + r + 1):
-                for y in range(by - r, by + r + 1):
-                    dist_sq = (x - bx)**2 + (y - by)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or z == bz or z == bz + h - 1:
-                             points.add((x, y, z))
+        # Disk/Ring on (x, y) plane
+        if fill:
+            for z in range(bz, bz + h):
+                for dx, dy in full_disk:
+                    points.append((bx + dx, by + dy, z))
+        else:
+             if h > 0:
+                for dx, dy in full_disk:
+                    points.append((bx + dx, by + dy, bz))
+             if h > 1:
+                for dx, dy in full_disk:
+                    points.append((bx + dx, by + dy, bz + h - 1))
+             for z in range(bz + 1, bz + h - 1):
+                for dx, dy in ring:
+                    points.append((bx + dx, by + dy, z))
                              
-    return list(points)
+    return points
 
 def catmull_rom_spline(points, segments=10):
     """Calculates points along a Catmull-Rom spline passing through all points."""
