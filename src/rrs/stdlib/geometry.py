@@ -67,10 +67,17 @@ def bezier_curve(points, segments=20):
     """Calculates points along a cubic Bezier curve."""
     curve_points = []
     n = len(points) - 1
-    for t in [i / segments for i in range(segments + 1)]:
+
+    # Precompute binomial coefficients
+    coeffs = [math.comb(n, i) for i in range(n + 1)]
+
+    for step in range(segments + 1):
+        t = step / segments
         x, y, z = 0, 0, 0
+        one_minus_t = 1 - t
+
         for i, pos in enumerate(points):
-            bernstein = math.factorial(n) / (math.factorial(i) * math.factorial(n - i)) * (t ** i) * ((1 - t) ** (n - i))
+            bernstein = coeffs[i] * (t ** i) * (one_minus_t ** (n - i))
             x += pos[0] * bernstein
             y += pos[1] * bernstein
             z += pos[2] * bernstein
