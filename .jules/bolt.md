@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-01-23 - Geometry Math Optimization
+**Learning:** Math-heavy geometry functions like `bezier_curve` suffer significantly from repeated factorial calculations in tight loops.
+**Action:** Always verify if mathematical coefficients (like binomials) can be precomputed outside the loop. Use `math.comb` instead of manual factorial arithmetic.
