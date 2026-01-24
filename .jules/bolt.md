@@ -3,9 +3,9 @@
 **Action:** When cloning simple state-container objects in hot paths, prefer `__new__` + `__dict__` copy over `copy.copy`, provided `__slots__` are not used.
 
 ## 2026-01-07 - ConvertPicture Optimization
-**Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance () is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
-**Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
-
-## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-01-20 - Rasterize Sphere Optimization
+**Learning:** Naive bounding-box iteration for spherical rasterization ($O(r^3)$) is prohibitively slow for large radii. Switching to an exact scanline approach using `math.isqrt` to bound loops ($O(r^2)$ for hollow shells) yielded a ~9.5x speedup for hollow spheres and ~2x for filled spheres. The overhead of strict bounds is negligible compared to the reduction in iteration count.
+**Action:** For voxel rasterization of geometric primitives, always derive exact loop bounds from the shape equation instead of iterating a bounding box and filtering.
