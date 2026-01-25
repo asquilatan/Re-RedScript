@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-01-28 - Integer Geometry Optimization
+**Learning:** Bounding box iteration for geometric shapes ($O(R^3)$) is severely inefficient compared to exact integer bound calculation ($O(R^2)$ for shells). Furthermore, accumulating points in a `set` to ensure uniqueness (when uniqueness is already guaranteed by the algorithm) adds significant overhead. Optimizing `rasterize_sphere` yielded a ~25x speedup for hollow spheres.
+**Action:** Use `math.isqrt` to compute exact loop bounds for integer geometry. Avoid `set` if the generation algorithm structurally guarantees uniqueness.
