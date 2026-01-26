@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-10-24 - Geometry Rasterization Optimization
+**Learning:** For 3D shape rasterization (like cylinders), iterating over a bounding box and checking distance conditions is extremely wasteful for hollow shapes. Pre-calculating a 2D template of "border only" points and iterating ONLY those points for each slice yielded a ~27x speedup (0.41s -> 0.015s) compared to the bounding box approach.
+**Action:** Always prefer iterating over a pre-calculated collection of valid points (template) rather than checking geometric conditions inside nested loops, especially for sparse/hollow shapes.
