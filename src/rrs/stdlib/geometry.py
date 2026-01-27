@@ -95,37 +95,66 @@ def rasterize_sphere(center, radius, fill=False):
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
-    points = set()
+    points = []
     r = int(radius)
     h = int(height)
     
+    # Pre-calculate 2D offsets
+    disk_offsets = []
+    ring_offsets = []
+
+    r_sq = r * r
+    r_inner_sq = (r - 1) ** 2
+
+    for u in range(-r, r + 1):
+        for v in range(-r, r + 1):
+            dist_sq = u*u + v*v
+            if dist_sq <= r_sq:
+                disk_offsets.append((u, v))
+                if dist_sq >= r_inner_sq:
+                    ring_offsets.append((u, v))
+
     # Simple axis alignment
     if axis == 'y':
-        for y in range(by, by + h):
-            for x in range(bx - r, bx + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (x - bx)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or y == by or y == by + h - 1:
-                             points.add((x, y, z))
+        for i in range(h):
+            y = by + i
+            is_cap = (i == 0 or i == h - 1)
+
+            if fill or is_cap:
+                current_offsets = disk_offsets
+            else:
+                current_offsets = ring_offsets
+
+            for u, v in current_offsets:
+                points.append((bx + u, y, bz + v))
+
     elif axis == 'x':
-         for x in range(bx, bx + h):
-            for y in range(by - r, by + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (y - by)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or x == bx or x == bx + h - 1:
-                             points.add((x, y, z))
+        for i in range(h):
+            x = bx + i
+            is_cap = (i == 0 or i == h - 1)
+
+            if fill or is_cap:
+                current_offsets = disk_offsets
+            else:
+                current_offsets = ring_offsets
+
+            for u, v in current_offsets:
+                points.append((x, by + u, bz + v))
+
     elif axis == 'z':
-        for z in range(bz, bz + h):
-            for x in range(bx - r, bx + r + 1):
-                for y in range(by - r, by + r + 1):
-                    dist_sq = (x - bx)**2 + (y - by)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or z == bz or z == bz + h - 1:
-                             points.add((x, y, z))
+        for i in range(h):
+            z = bz + i
+            is_cap = (i == 0 or i == h - 1)
+
+            if fill or is_cap:
+                current_offsets = disk_offsets
+            else:
+                current_offsets = ring_offsets
+
+            for u, v in current_offsets:
+                points.append((bx + u, by + v, z))
                              
-    return list(points)
+    return points
 
 def catmull_rom_spline(points, segments=10):
     """Calculates points along a Catmull-Rom spline passing through all points."""
