@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-01-28 - Geometry Sweep Optimization
+**Learning:** Sweeping geometric shapes (like spheres) along a path generates massive redundancy (measured 3.6x overhead for lines). `Module.add` simply appends, leading to bloated data structures.
+**Action:** When implementing sweep operations, pre-calculate the shape's offsets relative to the origin and use a `set` to track and deduplicate absolute positions before adding them to the module.

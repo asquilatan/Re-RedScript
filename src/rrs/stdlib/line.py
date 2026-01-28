@@ -6,13 +6,21 @@ def Line(start, end, block, thickness=1):
     m = create_module("Line")
     points = bresenham_line(start, end)
 
-    for p in points:
-        if thickness <= 1:
+    if thickness <= 1:
+        for p in points:
             place_in_module(m, p, block)
-        else:
-            sphere_points = rasterize_sphere(p, thickness/2, fill=True)
-            for sp in sphere_points:
-                place_in_module(m, sp, block)
+    else:
+        occupied = set()
+        # Pre-calculate sphere offsets relative to origin
+        # We use (0,0,0) as center so the resulting points are effectively offsets
+        sphere_offsets = rasterize_sphere((0, 0, 0), thickness / 2, fill=True)
+
+        for px, py, pz in points:
+            for ox, oy, oz in sphere_offsets:
+                target = (px + ox, py + oy, pz + oz)
+                if target not in occupied:
+                    occupied.add(target)
+                    place_in_module(m, target, block)
     return m
 
 def Path(points: List[Tuple[int, int, int]], block, thickness=1, closed=False, smooth=False):
