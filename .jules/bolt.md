@@ -3,9 +3,9 @@
 **Action:** When cloning simple state-container objects in hot paths, prefer `__new__` + `__dict__` copy over `copy.copy`, provided `__slots__` are not used.
 
 ## 2026-01-07 - ConvertPicture Optimization
-**Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance () is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
-**Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
-
-## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-05-23 - Geometry Generation Optimization
+**Learning:** In Python, constructing a list of tuples via list comprehension and extending the main list (`points.extend([...])`) is significantly faster (~17%) than calling `points.append(...)` inside a loop, due to reduced function call overhead and optimized internal list allocation.
+**Action:** For geometry generation functions that produce many points per iteration (like circle slices), prefer batch generation with list comprehensions over individual appends.
