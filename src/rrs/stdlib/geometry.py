@@ -95,37 +95,48 @@ def rasterize_sphere(center, radius, fill=False):
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
-    points = set()
+    # Optimization: Pre-calculate 2D circle points to avoid redundant distance checks
+    # and iteration over bounding box
+    disk_offsets = []  # For top/bottom caps (and fill=True)
+    ring_offsets = []  # For the tube part (shell)
+
     r = int(radius)
     h = int(height)
-    
-    # Simple axis alignment
-    if axis == 'y':
-        for y in range(by, by + h):
-            for x in range(bx - r, bx + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (x - bx)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or y == by or y == by + h - 1:
-                             points.add((x, y, z))
-    elif axis == 'x':
-         for x in range(bx, bx + h):
-            for y in range(by - r, by + r + 1):
-                for z in range(bz - r, bz + r + 1):
-                    dist_sq = (y - by)**2 + (z - bz)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or x == bx or x == bx + h - 1:
-                             points.add((x, y, z))
-    elif axis == 'z':
-        for z in range(bz, bz + h):
-            for x in range(bx - r, bx + r + 1):
-                for y in range(by - r, by + r + 1):
-                    dist_sq = (x - bx)**2 + (y - by)**2
-                    if dist_sq <= r**2:
-                        if fill or dist_sq >= (r-1)**2 or z == bz or z == bz + h - 1:
-                             points.add((x, y, z))
-                             
-    return list(points)
+
+    r_sq = r * r
+    inner_r_sq = (r - 1) ** 2
+
+    for u in range(-r, r + 1):
+        for v in range(-r, r + 1):
+            d2 = u * u + v * v
+            if d2 <= r_sq:
+                disk_offsets.append((u, v))
+                if not fill and d2 >= inner_r_sq:
+                    ring_offsets.append((u, v))
+
+    if fill:
+        ring_offsets = disk_offsets
+
+    points = []
+
+    for k in range(h):
+        is_cap = (k == 0) or (k == h - 1)
+        # For non-filled cylinder:
+        # Caps are full disks (disk_offsets)
+        # Middle layers are rings (ring_offsets)
+        current_offsets = disk_offsets if (fill or is_cap) else ring_offsets
+
+        if axis == 'y':
+            y = by + k
+            points.extend([(bx + u, y, bz + v) for u, v in current_offsets])
+        elif axis == 'x':
+            x = bx + k
+            points.extend([(x, by + u, bz + v) for u, v in current_offsets])
+        elif axis == 'z':
+            z = bz + k
+            points.extend([(bx + u, by + v, z) for u, v in current_offsets])
+
+    return points
 
 def catmull_rom_spline(points, segments=10):
     """Calculates points along a Catmull-Rom spline passing through all points."""
