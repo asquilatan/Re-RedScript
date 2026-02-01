@@ -9,3 +9,7 @@
 ## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2025-05-27 - Cuboid Hollow Optimization
+**Learning:** For hollow geometric shapes, iterating the full bounding box and checking `is_border` inside the loop scales at $O(N^3)$, causing significant overhead even if the inner logic is skipped. Switching to explicit face iteration ($O(N^2)$) yields massive gains for large structures (e.g., 200x200x200), primarily by eliminating millions of interpreter loop iterations, even if the number of actual block placements remains identical.
+**Action:** When generating hollow shells or surfaces, always construct loops to iterate only the surface coordinates rather than filtering a volume iteration.
