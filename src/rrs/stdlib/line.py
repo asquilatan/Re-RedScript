@@ -1,23 +1,42 @@
 from typing import List, Tuple
-from rrs.stdlib.geometry import bresenham_line, bezier_curve, catmull_rom_spline, rasterize_sphere
+from rrs.stdlib.geometry import (
+    bresenham_line,
+    bezier_curve,
+    catmull_rom_spline,
+    rasterize_sphere,
+)
 from rrs.stdlib.utils import create_module, place_in_module
+
 
 def Line(start, end, block, thickness=1):
     m = create_module("Line")
     points = bresenham_line(start, end)
 
-    for p in points:
-        if thickness <= 1:
+    if thickness <= 1:
+        for p in points:
             place_in_module(m, p, block)
-        else:
-            sphere_points = rasterize_sphere(p, thickness/2, fill=True)
-            for sp in sphere_points:
-                place_in_module(m, sp, block)
+    else:
+        # Optimization: Pre-calculate sphere offsets and deduplicate points
+        sphere_offsets = rasterize_sphere((0, 0, 0), thickness / 2, fill=True)
+        unique_points = set()
+
+        for p in points:
+            px, py, pz = p
+            for off in sphere_offsets:
+                ox, oy, oz = off
+                unique_points.add((px + ox, py + oy, pz + oz))
+
+        for p in unique_points:
+            place_in_module(m, p, block)
     return m
 
-def Path(points: List[Tuple[int, int, int]], block, thickness=1, closed=False, smooth=False):
+
+def Path(
+    points: List[Tuple[int, int, int]], block, thickness=1, closed=False, smooth=False
+):
     m = create_module("Path")
-    if len(points) < 2: return m
+    if len(points) < 2:
+        return m
 
     path_points = points
     if closed:
@@ -26,17 +45,18 @@ def Path(points: List[Tuple[int, int, int]], block, thickness=1, closed=False, s
     if smooth:
         spline_points = catmull_rom_spline(path_points, segments=10)
         for p in spline_points:
-                place_in_module(m, p, block)
+            place_in_module(m, p, block)
     else:
         for i in range(len(path_points) - 1):
-            seg_points = bresenham_line(path_points[i], path_points[i+1])
+            seg_points = bresenham_line(path_points[i], path_points[i + 1])
             for p in seg_points:
                 place_in_module(m, p, block)
     return m
+
 
 def Bezier(start, c1, c2, end, block, segments=20, thickness=1):
     m = create_module("Bezier")
     points = bezier_curve([start, c1, c2, end], segments)
     for p in points:
-            place_in_module(m, p, block)
+        place_in_module(m, p, block)
     return m
