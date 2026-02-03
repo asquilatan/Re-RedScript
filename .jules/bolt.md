@@ -3,9 +3,9 @@
 **Action:** When cloning simple state-container objects in hot paths, prefer `__new__` + `__dict__` copy over `copy.copy`, provided `__slots__` are not used.
 
 ## 2026-01-07 - ConvertPicture Optimization
-**Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance () is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
-**Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
-
-## 2026-01-07 - ConvertPicture Optimization
 **Learning:** In nearest-neighbor search using Euclidean distance ($||p - q||^2 = ||p||^2 + ||q||^2 - 2 p \cdot q$), the term $||p||^2$ (query pixel energy) is constant for all candidates $. It can be omitted when only the index of the minimum distance (argmin) is required. This avoids one large broadcasting addition and the calculation of pixel sums, yielding a ~20% speedup for image conversion.
 **Action:** When implementing nearest-neighbor searches where only the ranking matters, strip out constant terms from the distance metric to reduce operations.
+
+## 2026-02-03 - ConvertPicture Optimization II
+**Learning:** `place_in_module` is a convenience wrapper that introduces significant overhead (function call + `isinstance` checks) inside tight loops (like pixel iteration). Bypassing it and directly instantiating `Block` yielded a ~4x speedup (from ~1.8s to ~0.45s for 256x256 images).
+**Action:** In performance-critical loops, avoid generic helper functions that perform type checking. Use direct instantiation or specialized functions.
