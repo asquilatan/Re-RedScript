@@ -78,20 +78,81 @@ def bezier_curve(points, segments=20):
     return curve_points
 
 def rasterize_sphere(center, radius, fill=False):
+    """
+    Generates points for a sphere using an optimized rasterization algorithm.
+
+    Optimizations:
+    1. Loop Bounds: Instead of iterating the full bounding box (O(R^3)), we calculate
+       exact loop bounds for Y and Z based on the sphere equation, skipping ~50% of
+       checks (corners of the cube).
+    2. Hollow Skipping: For hollow spheres (fill=False), we calculate the inner solid
+       core radius and skip iterating Z values within that core. This reduces the
+       complexity from O(R^3) to roughly O(R^2) (proportional to surface area).
+    """
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r**2
+
+    # Precompute inner radius sq for shell logic
+    # The shell includes points where dist_sq >= (r-1)^2
+    min_r_sq = (r - 1)**2 if not fill else 0
     
+    # Iterate X within radius
     for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+        dx = x - cx
+        dx2 = dx*dx
+        # If x is outside radius (should cover by range, but for safety/clarity)
+        if dx2 > r_sq: continue
+
+        # Calculate max Y deviation at this X
+        # y^2 <= r^2 - x^2
+        dy_max = int(math.sqrt(r_sq - dx2))
+
+        for y in range(cy - dy_max, cy + dy_max + 1):
+            dy = y - cy
+            dy2 = dy*dy
+            # Calculate remaining squared radius allowance for Z
+            rem_sq = r_sq - dx2 - dy2
+            if rem_sq < 0: continue
+
+            # Max Z deviation
+            dz_max = int(math.sqrt(rem_sq))
+
+            if fill:
+                # Solid sphere: Fill the entire Z column
+                for z in range(cz - dz_max, cz + dz_max + 1):
+                    points.append((x, y, z))
+            else:
+                # Hollow sphere: Skip the inner core.
+                # We need points where dz^2 >= (r-1)^2 - dx^2 - dy^2
+                rhs_in = min_r_sq - dx2 - dy2
+
+                if rhs_in <= 0:
+                    # Inner radius constraint is irrelevant (inner sphere doesn't reach this x,y column).
+                    # All points in the outer sphere at this x,y are part of the shell.
+                    for z in range(cz - dz_max, cz + dz_max + 1):
+                        points.append((x, y, z))
+                else:
+                    # We have a hollow core.
+                    # We need |dz| >= sqrt(rhs_in)
+                    # Use ceil(sqrt(rhs_in)) logic carefully with integers
+                    dz_min = int(math.sqrt(rhs_in))
+                    if dz_min * dz_min < rhs_in:
+                        dz_min += 1
+
+                    # Add bottom cap of the shell column
+                    # Range: [-dz_max, -dz_min]
+                    if dz_min <= dz_max:
+                        for z in range(cz - dz_max, cz - dz_min + 1):
+                             points.append((x, y, z))
+
+                        # Add top cap of the shell column
+                        # Range: [dz_min, dz_max]
+                        for z in range(cz + dz_min, cz + dz_max + 1):
+                             points.append((x, y, z))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
