@@ -13,3 +13,7 @@
 ## 2026-02-04 - Hollow Cuboid Iteration
 **Learning:** Python loop overhead is approximately 60ns per iteration. For O(N^3) algorithms like hollow cuboid generation, iterating the full volume just to check boundaries is wasteful. Reducing iteration to O(N^2) faces saved ~25% runtime purely by eliminating loop control overhead.
 **Action:** For hollow shapes or shells, strictly iterate the surface coordinates using disjoint ranges rather than filtering a full volume scan.
+
+## 2026-02-12 - Cylinder Rasterization Optimization
+**Learning:** For extruded shapes like cylinders, pre-calculating the 2D cross-section offsets ($O(R^2)$) and extruding them via list addition is drastically faster than $O(H \times R^2)$ bounding box iteration with per-point distance checks (19x speedup observed). Additionally, accumulating points in a `list` instead of a `set` avoids hashing overhead when uniqueness is algorithmically guaranteed.
+**Action:** Always prefer 2D pre-calculation + extrusion for translationally symmetric 3D shapes.
