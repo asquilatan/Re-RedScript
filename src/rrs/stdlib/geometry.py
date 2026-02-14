@@ -79,19 +79,45 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
-    
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    r_sq = r**2
+    inner_r_sq = (r - 1)**2
+
+    # Optimization: Iterate only within the spherical bounds
+    # x goes from -r to r
+    for dx in range(-r, r + 1):
+        dx_sq = dx * dx
+        if dx_sq > r_sq:
+            continue
+
+        # Max dy depends on dx
+        # dy^2 <= r^2 - dx^2
+        max_dy = int((r_sq - dx_sq)**0.5)
+
+        for dy in range(-max_dy, max_dy + 1):
+            dy_sq = dy * dy
+            rem = r_sq - dx_sq - dy_sq
+            if rem < 0:
+                continue
+
+            max_dz = int(rem**0.5)
+
+            x = cx + dx
+            y = cy + dy
+
+            if fill:
+                # Add the full column of Z values
+                for dz in range(-max_dz, max_dz + 1):
+                    points.append((x, y, cz + dz))
+            else:
+                # If shell, check if we are near the boundary
+                # dist_sq >= (r-1)^2
+                for dz in range(-max_dz, max_dz + 1):
+                    dist_sq = dx_sq + dy_sq + dz * dz
+                    if dist_sq >= inner_r_sq:
+                        points.append((x, y, cz + dz))
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
