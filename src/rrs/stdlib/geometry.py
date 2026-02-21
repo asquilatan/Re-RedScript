@@ -79,19 +79,47 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
+    r_inner_sq = (r - 1) ** 2
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    for x in range(-r, r + 1):
+        x_sq = x * x
+        if x_sq > r_sq:
+            continue
+
+        y_lim = math.isqrt(r_sq - x_sq)
+        for y in range(-y_lim, y_lim + 1):
+            y_sq = y * y
+            r_xy_sq = x_sq + y_sq
+            z_lim = math.isqrt(r_sq - r_xy_sq)
+
+            if fill:
+                for z in range(-z_lim, z_lim + 1):
+                    points.append((cx + x, cy + y, cz + z))
+            else:
+                inner_sq_bound = r_inner_sq - r_xy_sq
+
+                # If we are outside the inner sphere's projection, the whole column is valid
+                if inner_sq_bound <= 0:
+                    for z in range(-z_lim, z_lim + 1):
+                        points.append((cx + x, cy + y, cz + z))
+                else:
+                    # We are inside the inner sphere's projection, skip the core
+                    # We need |z| >= sqrt(inner_sq_bound)
+                    # So z_gap is the first valid z coordinate in the positive half
+                    z_gap = math.isqrt(inner_sq_bound - 1) + 1
+
+                    # Add negative part
+                    for z in range(-z_lim, -z_gap + 1):
+                        points.append((cx + x, cy + y, cz + z))
+
+                    # Add positive part
+                    for z in range(z_gap, z_lim + 1):
+                        points.append((cx + x, cy + y, cz + z))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
