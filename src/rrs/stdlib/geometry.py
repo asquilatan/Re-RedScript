@@ -79,19 +79,51 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r2 = r**2
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    # Pre-calculate constants
+    inner_limit = (r - 1)**2 - 1 if not fill else -1
+
+    # Optimization: Iterate only within the bounding sphere bounds
+    # x goes from -r to r
+    for x in range(-r, r + 1):
+        x2 = x * x
+        # Max y for this x is sqrt(r^2 - x^2)
+        y_max = math.isqrt(r2 - x2)
+
+        for y in range(-y_max, y_max + 1):
+            y2 = y * y
+            d2_xy = x2 + y2
+
+            # Max z for this x, y is sqrt(r^2 - x^2 - y^2)
+            z_max = math.isqrt(r2 - d2_xy)
+
+            if fill or inner_limit < 0 or d2_xy > inner_limit:
+                # Fill mode OR point is already "outside" the inner hole in XY plane
+                # (so all valid z will be part of the shell)
+                # OR hole is empty
+                for z in range(-z_max, z_max + 1):
+                    points.append((cx + x, cy + y, cz + z))
+            else:
+                # Hollow mode and we might overlap with the hole
+                # We need to skip z values where x^2 + y^2 + z^2 <= (r-1)^2 - 1
+                # i.e., z^2 <= inner_limit - d2_xy
+                rem = inner_limit - d2_xy
+                z_skip = math.isqrt(rem)
+
+                # We keep points in [-z_max, -z_skip - 1] and [z_skip + 1, z_max]
+                # Python range stop is exclusive, so range(a, b) goes up to b-1.
+                # Lower part: -z_max to -z_skip-1 inclusive -> range(-z_max, -z_skip)
+                for z in range(-z_max, -z_skip):
+                    points.append((cx + x, cy + y, cz + z))
+
+                # Upper part: z_skip+1 to z_max inclusive -> range(z_skip + 1, z_max + 1)
+                for z in range(z_skip + 1, z_max + 1):
+                    points.append((cx + x, cy + y, cz + z))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
