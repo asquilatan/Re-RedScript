@@ -79,19 +79,51 @@ def bezier_curve(points, segments=20):
 
 def rasterize_sphere(center, radius, fill=False):
     cx, cy, cz = center
-    points = set()
+    points = []
     r = int(radius)
+    r_sq = r * r
     
-    for x in range(cx - r, cx + r + 1):
-        for y in range(cy - r, cy + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                dist_sq = (x - cx)**2 + (y - cy)**2 + (z - cz)**2
-                if dist_sq <= r**2:
-                    if fill:
-                        points.add((x, y, z))
-                    elif dist_sq >= (r - 1)**2: # Shell
-                        points.add((x, y, z))
-    return list(points)
+    # Iterate scanlines instead of full bounding box
+    for dx in range(-r, r + 1):
+        dx2 = dx * dx
+        rem_x = r_sq - dx2
+        # rem_x >= 0 is guaranteed by loop range
+
+        max_dy = math.isqrt(rem_x)
+        for dy in range(-max_dy, max_dy + 1):
+            dy2 = dy * dy
+            rem_y = rem_x - dy2
+            max_dz = math.isqrt(rem_y)
+
+            if fill:
+                for dz in range(-max_dz, max_dz + 1):
+                    points.append((cx + dx, cy + dy, cz + dz))
+            else:
+                # Shell logic
+                min_r_sq = (r - 1) ** 2
+                current_r2_plane = dx2 + dy2
+                min_rem_z_sq = min_r_sq - current_r2_plane
+
+                if min_rem_z_sq <= 0:
+                    # Current x,y is already on or outside the inner sphere
+                    # So all z in valid range [-max_dz, max_dz] are in the shell
+                    for dz in range(-max_dz, max_dz + 1):
+                        points.append((cx + dx, cy + dy, cz + dz))
+                else:
+                    # We are inside the inner sphere's cross-section
+                    # We need dz s.t. dz^2 >= min_rem_z_sq
+                    # |dz| >= ceil(sqrt(min_rem_z_sq))
+                    min_dz_abs = math.isqrt(min_rem_z_sq - 1) + 1
+
+                    if min_dz_abs <= max_dz:
+                         # Positive side
+                        for dz in range(min_dz_abs, max_dz + 1):
+                            points.append((cx + dx, cy + dy, cz + dz))
+                        # Negative side
+                        for dz in range(-max_dz, -min_dz_abs + 1):
+                            points.append((cx + dx, cy + dy, cz + dz))
+
+    return points
 
 def rasterize_cylinder(base, radius, height, axis='y', fill=False):
     bx, by, bz = base
